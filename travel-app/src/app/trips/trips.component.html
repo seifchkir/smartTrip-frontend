@@ -1,0 +1,111 @@
+<app-navbar></app-navbar>
+
+<div class="navbar-spacer"></div>
+<div class="trips-container">
+  <div class="trips-sidebar">
+    <div class="create-post">
+      <div class="user-info">
+        <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User">
+        <textarea placeholder="Share your travel experience..."></textarea>
+      </div>
+      <div class="post-actions">
+        <button class="add-photo">
+          <i class="fas fa-camera"></i>
+          Add Photos
+        </button>
+        <button class="add-location">
+          <i class="fas fa-map-marker-alt"></i>
+          Add Location
+        </button>
+        <button class="post-btn">Post</button>
+      </div>
+    </div>
+
+    <div class="filters">
+      <h3>Filter by</h3>
+      <div class="filter-options">
+        <button class="filter-btn active">All</button>
+        <button class="filter-btn">Following</button>
+        <button class="filter-btn">Popular</button>
+        <button class="filter-btn">Nearby</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="trips-feed">
+    <div class="trip-post" *ngFor="let post of posts">
+      <div class="post-header">
+        <img [src]="post.userAvatar" [alt]="post.userName">
+        <div class="post-info">
+          <h4>{{post.userName}}</h4>
+          <span class="location">
+            <i class="fas fa-map-marker-alt"></i>
+            {{post.location}}
+          </span>
+          <span class="time">{{post.timeAgo}}</span>
+        </div>
+      </div>
+
+      <div class="post-content">
+        <p>{{post.description}}</p>
+        <div class="post-images" *ngIf="post.images">
+          <img *ngFor="let image of post.images" [src]="image" alt="Trip photo">
+        </div>
+      </div>
+
+      <div class="post-actions">
+        <button class="action-btn">
+          <i class="fas fa-heart"></i>
+          <span>{{post.likes}}</span>
+        </button>
+        <button class="action-btn">
+          <i class="fas fa-comment"></i>
+          <span>{{post.comments}}</span>
+        </button>
+        <button class="action-btn">
+          <i class="fas fa-share"></i>
+          <span>Share</span>
+        </button>
+        <button class="action-btn">
+          <i class="fas fa-bookmark"></i>
+          <span>Save</span>
+        </button>
+      </div>
+
+      <div class="post-comments">
+        <div class="comment" *ngFor="let comment of post.recentComments">
+          <img [src]="comment.userAvatar" [alt]="comment.userName">
+          <div class="comment-content">
+            <h5>{{comment.userName}}</h5>
+            <p>{{comment.text}}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="trips-sidebar-right">
+    <div class="trending-destinations">
+      <h3>Trending Now</h3>
+      <div class="trending-item" *ngFor="let destination of trendingDestinations">
+        <img [src]="destination.image" [alt]="destination.name">
+        <div class="trending-info">
+          <h4>{{destination.name}}</h4>
+          <span>{{destination.posts}} posts</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="suggested-users">
+      <h3>Suggested Followers</h3>
+      <div class="user-item" *ngFor="let user of suggestedUsers">
+        <img [src]="user.avatar" [alt]="user.name">
+        <div class="user-info">
+          <h4>{{user.name}}</h4>
+          <span>{{user.followers}} followers</span>
+        </div>
+        <button class="follow-btn">Follow</button>
+      </div>
+    </div>
+  </div>
+</div>

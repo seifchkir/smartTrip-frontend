@@ -1,0 +1,57 @@
+<div class="photo-upload-container">
+  <div class="photo-upload-card">
+    <div class="brand">
+      <h1>SmartTrip</h1>
+    </div>
+
+    <div class="photo-upload-header">
+      <h2>Add a profile photo</h2>
+      <p>Help other travelers recognize you</p>
+    </div>
+
+    <div class="photo-upload-area">
+      <div class="photo-preview" [class.has-image]="previewUrl">
+        <img *ngIf="previewUrl" [src]="previewUrl" alt="Profile preview">
+        <div *ngIf="!previewUrl" class="upload-placeholder">
+          <i class="fas fa-user"></i>
+        </div>
+      </div>
+
+      <div class="upload-actions">
+        <input
+          type="file"
+          id="photo-upload"
+          accept="image/*"
+          (change)="onFileSelected($event)"
+          hidden
+        >
+        <button class="upload-btn" (click)="onFileUploadClick()">
+          <i class="fas fa-camera"></i>
+          Choose Photo
+        </button>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <!-- Make sure your button has the correct click handler -->
+      <button (click)="completeSignup()" class="complete-button" [disabled]="isLoading">
+        Complete Signup <i class="fas fa-check"></i>
+      </button>
+
+      <!-- And a skip button for users who don't want to upload a photo -->
+      <button (click)="skipPhotoUpload()" class="skip-button" [disabled]="isLoading">
+        Skip for now
+      </button>
+
+      <!-- Add loading indicator -->
+      <div class="loading-indicator" *ngIf="isLoading">
+        <i class="fas fa-spinner fa-spin"></i> Processing...
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Add this near the top of your form -->
+<div class="error-message" *ngIf="errorMessage">
+  {{ errorMessage }}
+</div>

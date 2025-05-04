@@ -1,0 +1,312 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+.signup-container {
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #f8f9fa;
+  padding: 20px;
+  font-family: 'Poppins', sans-serif;
+  overflow: hidden;
+  position: relative;
+
+  &::before {
+    content: '✈️';
+    position: absolute;
+    font-size: 2rem;
+    top: 15%;
+    left: -50px;
+    animation: flyPlane 15s linear infinite;
+    z-index: 1;
+  }
+
+  &::after {
+    content: '🌍';
+    position: absolute;
+    font-size: 3rem;
+    bottom: 15%;
+    right: 10%;
+    animation: rotatePlanet 20s linear infinite;
+  }
+}
+
+@keyframes flyPlane {
+  0% {
+    transform: translateX(-100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(calc(100vw + 50px)) rotate(45deg);
+  }
+}
+
+@keyframes rotatePlanet {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+.signup-card {
+  background: white;
+  border-radius: 24px;
+  padding: 2.5rem;
+  width: 100%;
+  max-width: 400px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+}
+
+.brand {
+  text-align: center;
+  margin-bottom: 2rem;
+
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #ff6b6b;
+    margin: 0;
+    letter-spacing: -1px;
+
+    &::after {
+      content: '';
+      display: block;
+      width: 50px;
+      height: 3px;
+      background: #4dabf7;
+      margin: 8px auto;
+    }
+  }
+}
+
+.illustration {
+  text-align: center;
+  margin-bottom: 2rem;
+  position: relative;
+
+  .world-map {
+    width: 100%;
+    height: 200px;
+    background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIxMDAlIiBoZWlnaHQ9IjEwMCUiIHZpZXdCb3g9IjAgMCA4MDAgNDAwIj48cGF0aCBmaWxsPSJub25lIiBzdHJva2U9IiM0ZGFiZjciIHN0cm9rZS13aWR0aD0iMiIgZD0iTTAgMjAwaDgwME0xMDAgMTAwaDYwME0xMDAgMzAwaDYwMCIvPjwvc3ZnPg==');
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    position: relative;
+  }
+
+  &::before {
+    content: '✈️';
+    position: absolute;
+    font-size: 1.5rem;
+    top: 30%;
+    left: 20%;
+    transform: rotate(45deg);
+    animation: floatPlane 8s ease-in-out infinite;
+    z-index: 2;
+  }
+
+  &::after {
+    content: '🌎';
+    position: absolute;
+    font-size: 2rem;
+    bottom: 10%;
+    right: 15%;
+    animation: bounce 6s ease-in-out infinite;
+  }
+
+  animation: float 6s ease-in-out infinite;
+}
+
+@keyframes floatPlane {
+  0% {
+    transform: translate(0, 0) rotate(45deg);
+  }
+  50% {
+    transform: translate(100px, -20px) rotate(45deg);
+  }
+  100% {
+    transform: translate(0, 0) rotate(45deg);
+  }
+}
+
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-15px);
+  }
+}
+
+.signup-header {
+  text-align: center;
+  margin-bottom: 2rem;
+
+  h2 {
+    color: #343a40;
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+    line-height: 1.4;
+    max-width: 90%;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  p {
+    color: #868e96;
+    font-size: 1rem;
+  }
+}
+
+.signup-form {
+  .form-group {
+    display: flex;
+    align-items: center;
+    background: #f8f9fa;
+    border: 1px solid #e9ecef;
+    border-radius: 12px;
+    padding: 0 15px;
+    margin-bottom: 1.25rem;
+
+    .input-icon {
+      color: #adb5bd;
+      font-size: 1rem;
+      margin-right: 10px; // space between icon and input
+      display: flex;
+      align-items: center;
+      order: -1; // This ensures the icon appears before the input
+    }
+
+    input {
+      border: none;
+      background: transparent;
+      padding: 15px 0;
+      font-size: 0.95rem;
+      width: 100%;
+
+      &::placeholder {
+        color: #adb5bd;
+      }
+
+      &:focus {
+        outline: none;
+      }
+
+      &:focus ~ .input-icon {
+        color: #4dabf7;
+      }
+
+      &.is-invalid ~ .input-icon {
+        color: #ff6b6b;
+      }
+    }
+
+    .invalid-feedback {
+      color: #ff6b6b;
+      font-size: 0.875rem;
+      margin-top: 0.5rem;
+      padding-left: 15px;
+    }
+  }
+}
+
+// Add this to your existing SCSS file
+
+.step-indicator {
+  display: flex;
+  justify-content: center;
+  margin-top: 1rem;
+  gap: 1rem;
+
+  .step {
+    font-size: 0.85rem;
+    color: #adb5bd;
+    position: relative;
+    padding-bottom: 0.5rem;
+
+    &.active {
+      color: #4dabf7;
+      font-weight: 500;
+
+      &::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 100%;
+        height: 2px;
+        background-color: #4dabf7;
+      }
+    }
+  }
+}
+
+// Update the signup button to include the arrow icon
+.signup-button {
+  width: 100%;
+  padding: 14px;
+  background: #4dabf7;
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  margin-top: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.5rem;
+
+  i {
+    transition: transform 0.3s ease;
+  }
+
+  &:hover {
+    background: #3b8ce2;
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(77, 171, 247, 0.2);
+
+    i {
+      transform: translateX(4px);
+    }
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+.signup-footer {
+  text-align: center;
+  margin-top: 1.5rem;
+  color: #868e96;
+  font-size: 0.875rem;
+
+  a {
+    color: #4dabf7;
+    text-decoration: none;
+    font-weight: 500;
+    margin-left: 4px;
+
+    &:hover {
+      text-decoration: underline;
+    }
+  }
+}
+
+// Animation keyframes
+@keyframes float {
+  0% {
+    transform: translateY(0px);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+  100% {
+    transform: translateY(0px);
+  }
+}

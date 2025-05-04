@@ -1,0 +1,131 @@
+<!-- HTML Template: trending.component.html -->
+<app-navbar></app-navbar>
+
+<div class="navbar-spacer"></div>
+<div class="trending-container">
+  <div class="trending-header">
+    <h1>Trending Destinations</h1>
+    <p>Discover the most popular places this week</p>
+
+    <div class="search-container">
+      <input type="text" placeholder="Search destinations..." [(ngModel)]="searchTerm" (input)="filterDestinations()">
+      <button class="search-btn"><i class="fas fa-search"></i></button>
+    </div>
+
+    <div class="trending-filters">
+      <button class="filter-btn active" (click)="setFilter('All')">All</button>
+      <button class="filter-btn" (click)="setFilter('Asia')">Asia</button>
+      <button class="filter-btn" (click)="setFilter('Europe')">Europe</button>
+      <button class="filter-btn" (click)="setFilter('Americas')">Americas</button>
+      <button class="filter-btn" (click)="setFilter('Africa')">Africa</button>
+
+      <div class="sort-options">
+        <label>Sort by: </label>
+        <select [(ngModel)]="sortOption" (change)="sortDestinations()">
+          <option value="popular">Most Popular</option>
+          <option value="recent">Recently Added</option>
+          <option value="likes">Most Liked</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="trending-grid">
+    <div class="trending-card" *ngFor="let place of filteredPlaces">
+      <div class="card-image">
+        <img [src]="place.image" [alt]="place.name" loading="lazy">
+        <div class="card-overlay">
+          <span class="trending-badge">
+            <i class="fas fa-fire"></i>
+            Trending
+          </span>
+          <div class="price-indicator">{{place.priceLevel}}</div>
+          <div class="card-stats">
+            <span (click)="likeDestination(place)" [class.liked]="place.liked">
+              <i class="fas fa-heart"></i> {{place.likes}}
+            </span>
+            <span><i class="fas fa-comment"></i> {{place.comments}}</span>
+          </div>
+        </div>
+      </div>
+      <div class="card-content">
+        <h3>{{place.name}}</h3>
+        <p>{{place.description}}</p>
+
+        <div class="card-weather-review">
+          <div class="weather-info">
+            <i class="fas" [ngClass]="getWeatherIcon(place.weather)"></i>
+            <span>{{place.temperature}}°C</span>
+          </div>
+
+          <div class="review-preview">
+            <div class="review-stars">
+              <ng-container *ngFor="let star of generateRatingStars(place.rating)">
+                <i class="fas fa-star" *ngIf="star === 1"></i>
+                <i class="fas fa-star-half-alt" *ngIf="star === 0.5"></i>
+                <i class="far fa-star" *ngIf="star === 0"></i>
+              </ng-container>
+              <span class="rating-number">{{place.rating}}</span>
+            </div>
+            <p class="review-text">"{{place.topReview}}"</p>
+            <span class="review-author">- {{place.reviewAuthor}}</span>
+          </div>
+        </div>
+
+        <div class="action-buttons">
+          <button class="btn-details" [routerLink]="['/destination', place.id]">View Details</button>
+          <button class="btn-save" (click)="saveDestination(place)" [class.saved]="place.saved">
+            <i class="fas" [ngClass]="place.saved ? 'fa-bookmark' : 'fa-bookmark'"></i>
+          </button>
+        </div>
+
+        <div class="card-footer">
+          <div class="location">
+            <i class="fas fa-map-marker-alt"></i>
+            <span>{{place.location}}</span>
+          </div>
+          <div class="tags">
+            <span class="tag" *ngFor="let tag of place.tags">{{tag}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="load-more" *ngIf="hasMoreDestinations">
+      <button (click)="loadMoreDestinations()">Load More Destinations</button>
+    </div>
+  </div>
+
+  <div class="trending-sidebar">
+    <div class="top-travelers">
+      <h3>Top Travelers</h3>
+      <div class="traveler-item" *ngFor="let traveler of topTravelers">
+        <img [src]="traveler.avatar" [alt]="traveler.name" loading="lazy">
+        <div class="traveler-info">
+          <h4>{{traveler.name}}</h4>
+          <span>{{traveler.posts}} posts</span>
+        </div>
+        <button class="follow-btn" (click)="followTraveler(traveler)">
+          {{traveler.followed ? 'Following' : 'Follow'}}
+        </button>
+      </div>
+    </div>
+
+    <div class="trending-tags">
+      <h3>Popular Tags</h3>
+      <div class="tags-grid">
+        <span class="tag" *ngFor="let tag of popularTags" (click)="filterByTag(tag.name)">
+          #{{tag.name}}
+          <span class="tag-count">{{tag.count}}</span>
+        </span>
+      </div>
+    </div>
+
+    <div class="theme-toggle-container">
+      <button class="theme-toggle" (click)="toggleTheme()" aria-label="Toggle dark mode">
+        <i class="fas" [ngClass]="darkMode ? 'fa-sun' : 'fa-moon'"></i>
+        {{darkMode ? 'Light Mode' : 'Dark Mode'}}
+      </button>
+    </div>
+  </div>
+</div>

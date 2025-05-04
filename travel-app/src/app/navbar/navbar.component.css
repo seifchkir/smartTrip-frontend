@@ -1,0 +1,139 @@
+.navbar {
+  background-color: rgba(255, 255, 255, 0.95);
+  padding: 1rem 0;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 1000;
+  box-shadow: 0 2px 15px rgba(0, 0, 0, 0.1);
+}
+
+.navbar-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.navbar-brand a {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  text-decoration: none;
+  color: #2c3e50;
+  font-size: 1.5rem;
+  font-weight: 700;
+}
+
+.navbar-brand i {
+  color: #ff6b6b;
+  font-size: 1.75rem;
+}
+
+.navbar-links {
+  display: flex;
+  gap: 2rem;
+  align-items: center;
+}
+
+.navbar-links a {
+  text-decoration: none;
+  color: #2c3e50;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+}
+
+.navbar-links a i {
+  font-size: 1.1rem;
+  color: #7f8c8d;
+  transition: color 0.3s ease;
+}
+
+.navbar-links a:hover {
+  background-color: #f8f9fa;
+}
+
+.navbar-links a:hover i {
+  color: #ff6b6b;
+}
+
+.navbar-links a.active {
+  color: #ff6b6b;
+  background-color: #fff1f1;
+}
+
+.navbar-links a.active i {
+  color: #ff6b6b;
+}
+
+.navbar-auth {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+}
+
+.navbar-auth a {
+  text-decoration: none;
+  padding: 0.5rem 1.25rem;
+  border-radius: 8px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  transition: all 0.3s ease;
+}
+
+.navbar-auth .login-btn {
+  color: #2c3e50;
+  background: transparent;
+  border: 2px solid #e0e0e0;
+}
+
+.navbar-auth .login-btn:hover {
+  border-color: #ff6b6b;
+  color: #ff6b6b;
+}
+
+.navbar-auth .sign-up-btn {
+  background: #ff6b6b;
+  color: white;
+  border: 2px solid #ff6b6b;
+}
+
+.navbar-auth .sign-up-btn:hover {
+  background: #ff5252;
+  border-color: #ff5252;
+  transform: translateY(-2px);
+}
+
+@media (max-width: 768px) {
+  .navbar-container {
+    padding: 0 1rem;
+  }
+
+  .navbar-links {
+    display: none;
+  }
+
+  .navbar-auth {
+    gap: 0.5rem;
+  }
+
+  .navbar-auth a {
+    padding: 0.5rem 1rem;
+  }
+
+  .navbar-auth span {
+    display: none;
+  }
+}
+
+

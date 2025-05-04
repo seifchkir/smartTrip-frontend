@@ -1,0 +1,117 @@
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 25px;
+  background-color: white;
+  height: 60px; /* Slightly reduced height */
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05); /* Lighter shadow */
+}
+
+.navbar-brand {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  margin-right: 30px;
+
+  .logo-circle {
+    width: 28px; /* Slightly smaller */
+    height: 28px; /* Slightly smaller */
+    background-color: #ff5a5f;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 8px;
+
+    i {
+      color: white;
+      font-size: 20px; /* Smaller icon */
+    }
+  }
+
+  .brand-name {
+    font-size: 18px; /* Smaller font */
+    font-weight: 600;
+    color: #333; /* Slightly lighter color */
+  }
+}
+
+.nav-links {
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  gap: 35px; /* Reduced spacing */
+
+  a {
+    text-decoration: none;
+    color: #333; /* Lighter text color */
+    font-size: 16px; /* Smaller font size */
+    font-weight: 500; /* Less bold */
+    display: flex;
+    align-items: center;
+    padding: 8px 0; /* Reduced padding */
+
+    i {
+      margin-right: 8px;
+      font-size: 18px; /* Smaller icon */
+      color: #6c757d; /* More gray/muted icon color */
+    }
+
+    &:hover {
+      color: #ff5a5f;
+    }
+
+    &.active {
+      color: #ff5a5f;
+    }
+  }
+}
+
+.auth-buttons {
+  display: flex;
+  gap: 10px;
+  margin-left: 15px;
+
+  a {
+    text-decoration: none;
+    display: flex;
+    align-items: center;
+    font-size: 14px; /* Smaller font */
+    font-weight: 500;
+    padding: 7px 15px; /* Adjusted padding */
+    border-radius: 6px; /* Slightly rounder */
+
+    i {
+      margin-right: 6px;
+    }
+  }
+
+  .signup-btn {
+    background-color: #ff5a5f;
+    color: white;
+
+    &:hover {
+      background-color: #ff4146;
+    }
+  }
+
+  .login-btn {
+    color: #333; /* Lighter text color */
+    border: 1px solid #e0e0e0; /* Lighter border */
+
+    &:hover {
+      color: #ff5a5f;
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .nav-links {
+    display: none;
+  }
+
+  .navbar {
+    padding: 0 15px;
+  }
+}

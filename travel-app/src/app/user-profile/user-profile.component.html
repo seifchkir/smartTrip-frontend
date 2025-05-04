@@ -1,0 +1,71 @@
+<div class="profile-container">
+  <!-- Profile header section -->
+  <div class="profile-header">
+    <div class="profile-cover-photo"></div>
+
+    <div class="profile-info-container">
+      <div class="profile-photo">
+        <img [src]="user.photoUrl" alt="{{ user.firstName }} {{ user.lastName }}">
+      </div>
+
+      <div class="profile-info">
+        <h1>{{ user.firstName }} {{ user.lastName }}</h1>
+        <p class="bio">{{ user.bio }}</p>
+        <div class="profile-details">
+          <span><i class="fas fa-map-marker-alt"></i> {{ user.location }}</span>
+          <span><i class="fas fa-calendar-alt"></i> Joined {{ user.joinedDate }}</span>
+          <span><i class="fas fa-envelope"></i> {{ user.email }}</span>
+        </div>
+      </div>
+
+      <div class="profile-actions">
+        <button class="follow-btn">Follow</button>
+        <button class="message-btn">Message</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Profile navigation -->
+  <div class="profile-nav">
+    <ul>
+      <li class="active">Posts</li>
+      <li>Photos</li>
+      <li>Trips</li>
+      <li>About</li>
+    </ul>
+  </div>
+
+  <!-- Posts section (placeholder for future implementation) -->
+  <div class="posts-container">
+    <h2>Posts</h2>
+
+    <div class="posts-grid">
+      <div class="post-placeholder" *ngFor="let post of posts">
+        <div class="post-content">
+          <div class="post-header">
+            <div class="post-avatar">
+              <img [src]="user.photoUrl" alt="{{ user.firstName }}">
+            </div>
+            <div class="post-info">
+              <h3>{{ user.firstName }} {{ user.lastName }}</h3>
+              <p class="post-time">Just now</p>
+            </div>
+          </div>
+
+          <div class="post-body">
+            <div class="post-text-placeholder"></div>
+            <div class="post-text-placeholder short"></div>
+          </div>
+
+          <div class="post-image-placeholder"></div>
+
+          <div class="post-actions">
+            <button><i class="fas fa-thumbs-up"></i> Like</button>
+            <button><i class="fas fa-comment"></i> Comment</button>
+            <button><i class="fas fa-share"></i> Share</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

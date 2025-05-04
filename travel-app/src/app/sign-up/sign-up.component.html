@@ -1,0 +1,111 @@
+<div class="signup-container">
+  <div class="signup-card">
+    <div class="brand">
+      <h1>SmartTrip</h1>
+    </div>
+
+    <div class="illustration">
+      <div class="world-map">
+        <!-- We'll create this with CSS -->
+      </div>
+    </div>
+
+    <div class="signup-header">
+      <h2>Every journey begins with a single step — start yours today.</h2>
+    </div>
+
+    <!-- Error message and loading indicator -->
+    <div class="error-message" *ngIf="errorMessage">
+      {{ errorMessage }}
+    </div>
+
+    <div class="loading-indicator" *ngIf="isLoading">
+      <i class="fas fa-spinner fa-spin"></i> Processing...
+    </div>
+
+    <form [formGroup]="signUpForm" (ngSubmit)="onSubmit()" class="signup-form">
+      <div class="form-group">
+        <input
+          type="text"
+          formControlName="firstName"
+          placeholder="First Name"
+          [ngClass]="{'is-invalid': submitted && signUpForm.get('firstName')?.errors}"
+        >
+        <div class="input-icon">
+          <i class="fas fa-user"></i>
+        </div>
+        <div class="invalid-feedback" *ngIf="submitted && signUpForm.get('firstName')?.errors?.['required']">
+          First name is required
+        </div>
+      </div>
+
+      <div class="form-group">
+        <input
+          type="text"
+          formControlName="lastName"
+          placeholder="Last Name"
+          [ngClass]="{'is-invalid': submitted && signUpForm.get('lastName')?.errors}"
+        >
+        <div class="input-icon">
+          <i class="fas fa-user"></i>
+        </div>
+        <div class="invalid-feedback" *ngIf="submitted && signUpForm.get('lastName')?.errors?.['required']">
+          Last name is required
+        </div>
+      </div>
+
+      <div class="form-group">
+        <input
+          type="email"
+          formControlName="email"
+          placeholder="Email"
+          [ngClass]="{'is-invalid': submitted && signUpForm.get('email')?.errors}"
+        >
+        <div class="input-icon">
+          <i class="fas fa-envelope"></i>
+        </div>
+        <div class="invalid-feedback" *ngIf="submitted && signUpForm.get('email')?.errors?.['required']">
+          Email is required
+        </div>
+      </div>
+
+      <div class="form-group">
+        <input
+          type="password"
+          formControlName="password"
+          placeholder="Password"
+          [ngClass]="{'is-invalid': submitted && signUpForm.get('password')?.errors}"
+        >
+        <div class="input-icon">
+          <i class="fas fa-lock"></i>
+        </div>
+        <div class="invalid-feedback" *ngIf="submitted && signUpForm.get('password')?.errors?.['required']">
+          Password is required
+        </div>
+      </div>
+
+      <div class="form-group">
+        <input
+          type="password"
+          formControlName="confirmPassword"
+          placeholder="Confirm Password"
+          [ngClass]="{'is-invalid': submitted && signUpForm.errors?.['mismatch']}"
+        >
+        <div class="input-icon">
+          <i class="fas fa-lock"></i>
+        </div>
+        <div class="invalid-feedback" *ngIf="submitted && signUpForm.errors?.['mismatch']">
+          Passwords do not match
+        </div>
+      </div>
+
+      <button type="submit" class="signup-button">
+        Next <i class="fas fa-arrow-right"></i>
+      </button>
+
+      <div class="signup-footer">
+        <p>Already have an account? <a routerLink="/login">Login Now</a></p>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,0 +1,142 @@
+<app-navbar></app-navbar>
+<div class="home-container">
+  <section class="hero-section">
+    <div class="hero-content">
+      <h1>
+        <span class="accent-text">Plan Your Perfect</span>
+        <span class="main-text">Trip with AI</span>
+      </h1>
+      <p>Describe your dream vacation and let our AI create a personalized itinerary</p>
+
+      <div class="trip-planner">
+        <div class="planner-content">
+          <div class="planner-input-group">
+            <textarea
+              placeholder="Describe your perfect trip...
+Example: I want to plan a 5-day beach vacation in Greece with my family. We love water activities and local cuisine."
+              rows="3"
+              class="trip-description"></textarea>
+
+            <button class="plan-trip-btn">
+              <i class="fas fa-magic"></i>
+              Generate My Trip
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+<!--
+  <section class="categories-section">
+    <div class="section-header">
+      <h2>Explore by Category</h2>
+      <p>Find the perfect destination for your next adventure</p>
+    </div>
+    <div class="categories-grid">
+      <div class="category-card">
+        <i class="fas fa-hotel"></i>
+        <h3>Hotels</h3>
+        <span>1500+ Places</span>
+      </div>
+      <div class="category-card">
+        <i class="fas fa-mountain"></i>
+        <h3>Adventures</h3>
+        <span>800+ Activities</span>
+      </div>
+      <div class="category-card">
+        <i class="fas fa-utensils"></i>
+        <h3>Restaurants</h3>
+        <span>2000+ Places</span>
+      </div>
+      <div class="category-card">
+        <i class="fas fa-route"></i>
+        <h3>Tours</h3>
+        <span>500+ Routes</span>
+      </div>
+    </div>
+  </section>
+-->
+
+
+  <!-- Featured Destinations -->
+  <section class="featured-destinations">
+    <div class="section-header">
+      <h2>Popular Destinations</h2>
+      <p>Discover the most loved places by our community</p>
+    </div>
+    <div class="destinations-grid">
+      <div class="destination-card" *ngFor="let destination of destinations">
+        <div class="destination-image">
+          <img [src]="destination.image" [alt]="destination.name">
+          <div class="destination-overlay">
+            <div class="stats">
+              <span><i class="fas fa-heart"></i> {{destination.likes}}</span>
+              <span><i class="fas fa-comment"></i> {{destination.comments}}</span>
+            </div>
+          </div>
+        </div>
+        <div class="destination-info">
+          <h3>{{destination.name}}</h3>
+          <p>{{destination.description}}</p>
+          <div class="user-info">
+            <img [src]="destination.userAvatar" [alt]="destination.userName">
+            <span>{{destination.userName}}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Trending Experiences -->
+  <section class="trending-section">
+    <div class="section-header">
+      <h2>Trending Experiences</h2>
+      <p>Most popular activities this week</p>
+    </div>
+    <div class="trending-tags">
+      <span class="tag">#BeachLife</span>
+      <span class="tag">#CityBreak</span>
+      <span class="tag">#Adventure</span>
+      <span class="tag">#LocalFood</span>
+      <span class="tag">#Culture</span>
+      <span class="tag">#Nature</span>
+    </div>
+  </section>
+
+  <!-- Community Section -->
+  <section class="community-section">
+    <div class="section-header">
+      <h2>Join Our Community</h2>
+      <p>Connect with travelers from around the world</p>
+    </div>
+    <div class="community-stats">
+      <div class="stat">
+        <span class="number">10K+</span>
+        <span class="label">Active Travelers</span>
+      </div>
+      <div class="stat">
+        <span class="number">5K+</span>
+        <span class="label">Shared Stories</span>
+      </div>
+      <div class="stat">
+        <span class="number">100+</span>
+        <span class="label">Destinations</span>
+      </div>
+    </div>
+    <div class="testimonials">
+      <div class="testimonial-card" *ngFor="let testimonial of testimonials">
+        <div class="testimonial-content">
+          <p>"{{testimonial.text}}"</p>
+          <div class="testimonial-author">
+            <img [src]="testimonial.avatar" [alt]="testimonial.name">
+            <div class="author-info">
+              <h4>{{testimonial.name}}</h4>
+              <span>{{testimonial.location}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+</div>
