@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, catchError, throwError } from 'rxjs';
+import { Observable, catchError, of, throwError } from 'rxjs';
 
 @Injectable({
   providedIn: 'root'
@@ -20,62 +20,66 @@ export class AuthService {
       'Content-Type': 'application/json',
       'Accept': 'application/json'
     });
-
+  
+    // Format the data exactly as the backend expects it
+    const requestData = {
+      firstName: userData.firstName,
+      lastName: userData.lastName,
+      email: userData.email,
+      password: userData.password
+    };
+  
     console.log('Making registration request to:', `${this.apiUrl}/auth/register`);
-    console.log('Request payload:', JSON.stringify(userData));
-
-    return this.http.post(`${this.apiUrl}/auth/register`, userData, {
-      headers,
-      observe: 'response'  // Get the full response including headers
+    console.log('Request payload:', JSON.stringify(requestData));
+  
+    return this.http.post(`${this.apiUrl}/auth/register`, requestData, {
+      headers
     })
     .pipe(
       catchError(error => {
         console.error('Registration request error details:', error);
-
-        if (error.status === 0) {
-          console.log('Trying alternative URL:', this.altApiUrl1);
-          return this.http.post(`${this.altApiUrl1}/auth/register`, userData, { headers })
-            .pipe(
-              catchError(error2 => {
-                console.error('Second attempt failed:', error2);
-                return throwError(() => new Error('Cannot connect to server. Please check if the backend is running.'));
-              })
-            );
+        
+        // Check if the user already exists
+        if (error.status === 400) {
+          const errorMessage = error.error?.message || 'Invalid data format';
+          if (errorMessage.includes('already exists')) {
+            return throwError(() => new Error('This email is already registered. Please login instead.'));
+          }
+          return throwError(() => new Error('Registration failed: ' + errorMessage));
         }
-
+  
         return throwError(() => error);
       })
     );
   }
 
   // Second step: Upload profile photo with the new backend logic
-  // Second step: Upload profile photo with the new backend logic
-    uploadProfilePhoto(userId: string, photoData: FormData): Observable<any> {
-      console.log('Uploading photo with FormData:', Array.from(photoData.entries()));
-
-      // Use the exact endpoint from your backend
-      return new Observable(observer => {
-        fetch(`${this.apiUrl}/users/complete-profile`, {
-          method: 'POST',
-          body: photoData
-        })
-        .then(response => {
-          console.log('Profile photo upload response status:', response.status);
-          return response.json().catch(() => ({ success: true }));
-        })
-        .then(data => {
-          console.log('Profile photo upload success data:', data);
-          observer.next(data);
-          observer.complete();
-        })
-        .catch(error => {
-          console.error('Profile photo upload fetch error:', error);
-          // Return success anyway to continue the flow
-          observer.next({ success: true, message: 'Photo upload handled' });
-          observer.complete();
-        });
+  uploadProfilePhoto(userId: string, photoData: FormData): Observable<any> {
+    console.log('Uploading photo with FormData:', Array.from(photoData.entries()));
+  
+    // Use the exact endpoint from your backend
+    return new Observable(observer => {
+      fetch(`${this.apiUrl}/users/complete-profile`, {
+        method: 'POST',
+        body: photoData
+      })
+      .then(response => {
+        console.log('Profile photo upload response status:', response.status);
+        return response.json().catch(() => ({ success: true }));
+      })
+      .then(data => {
+        console.log('Profile photo upload success data:', data);
+        observer.next(data);
+        observer.complete();
+      })
+      .catch(error => {
+        console.error('Profile photo upload fetch error:', error);
+        // Return success anyway to continue the flow
+        observer.next({ success: true, message: 'Photo upload handled' });
+        observer.complete();
       });
-    }
+    });
+  }
 
   // Store the JWT token
   setToken(token: string): void {
@@ -92,5 +96,101 @@ export class AuthService {
 
   logout(): void {
     localStorage.removeItem('auth_token');
+  }
+
+  // Add this method to your auth service
+
+  getUserByEmail(email: string): Observable<any> {
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${this.getToken()}`
+    });
+
+    return this.http.get(`${this.apiUrl}/users/by-email?email=${email}`, { headers })
+      .pipe(
+        catchError(error => {
+          console.error('Error fetching user by email:', error);
+
+          if (error.status === 0) {
+            console.log('Trying alternative URL:', this.altApiUrl1);
+            return this.http.get(`${this.altApiUrl1}/users/by-email?email=${email}`, { headers })
+              .pipe(
+                catchError(error2 => {
+                  console.error('Second attempt failed:', error2);
+                  return throwError(() => new Error('Cannot connect to server. Please check if the backend is running.'));
+                })
+              );
+          }
+
+          return throwError(() => error);
+        })
+      );
+  }
+
+  // Add this method to your AuthService
+
+  getUserProfilePhoto(email: string): Observable<any> {
+    return this.http.get(`${this.apiUrl}/users/photo?email=${email}`).pipe(
+      catchError(error => {
+        console.error('Error fetching user photo:', error);
+        return of(null);
+      })
+    );
+  }
+
+  // Add a login method to connect with the authenticate endpoint
+  // Add or update the login method in your AuthService
+  // In the login method of your auth.service.ts
+  
+  login(credentials: { email: string; password: string }): Observable<any> {
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    });
+  
+    console.log('Making login request to:', `${this.apiUrl}/auth/authenticate`);
+    console.log('Login payload:', JSON.stringify(credentials));
+  
+    // Try with a different format that might match what the backend expects
+    const requestBody = {
+      email: credentials.email,
+      password: credentials.password
+    };
+  
+    return this.http.post(`${this.apiUrl}/auth/authenticate`, requestBody, {
+      headers
+    })
+    .pipe(
+      catchError(error => {
+        console.error('Login request error details:', error);
+        
+        if (error.status === 401) {
+          return throwError(() => new Error('Invalid email or password. Please try again.'));
+        } else if (error.status === 403) {
+          // Account is locked
+          return throwError(() => new Error('Your account is temporarily locked. Please try again later or reset your password.'));
+        }
+        
+        // Pass the error through to the component for handling
+        return throwError(() => new Error('Login failed. Please try again later.'));
+      })
+    );
+  }
+
+  // Add a method to request account unlock or password reset
+  requestPasswordReset(email: string): Observable<any> {
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Accept': 'application/json'
+    });
+  
+    return this.http.post(`${this.apiUrl}/auth/reset-password-request`, { email }, { headers })
+      .pipe(
+        catchError(error => {
+          console.error('Password reset request error:', error);
+          return throwError(() => new Error('Unable to request password reset. Please try again later.'));
+        })
+      );
   }
 }

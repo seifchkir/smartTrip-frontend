@@ -93,16 +93,16 @@ export class ProfilePhotoComponent implements OnInit {
         // Clear the temporary storage
         localStorage.removeItem('signupData');
 
-        // Navigate to trips page
-        this.router.navigate(['/trips']);
+        // Navigate to home page instead of trips
+        this.router.navigate(['/home']);
       },
       error: (error) => {
         console.error('Photo upload error:', error);
 
-        // Even if there's an error, proceed to the trips page
-        console.log('Proceeding to trips page despite error');
+        // Even if there's an error, proceed to the home page
+        console.log('Proceeding to home page despite error');
         localStorage.removeItem('signupData');
-        this.router.navigate(['/trips']);
+        this.router.navigate(['/home']);
       },
       complete: () => {
         this.isLoading = false;
@@ -114,7 +114,7 @@ export class ProfilePhotoComponent implements OnInit {
     // Clear the temporary storage
     localStorage.removeItem('signupData');
 
-    // Navigate to trips page
-    this.router.navigate(['/trips']);
+    // Navigate to home page instead of trips
+    this.router.navigate(['/home']);
   }
 }

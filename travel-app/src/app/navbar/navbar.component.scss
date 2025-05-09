@@ -67,6 +67,42 @@
     }
   }
 }
+// Add this to your existing navbar.component.scss file
+
+// Update the profile-icon class to handle the profile photo
+.profile-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background-color: #f0f2f5;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  margin-right: 10px;
+  overflow: hidden; // Added to keep the image within the circular boundary
+
+  i {
+    color: #555;
+    font-size: 18px;
+  }
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover; // Ensures the image covers the area properly
+  }
+
+  &:hover {
+    background-color: #e4e6eb;
+    transform: scale(1.05);
+
+    i {
+      color: #ff5a5f;
+    }
+  }
+}
 
 .auth-buttons {
   display: flex;
@@ -113,5 +149,28 @@
 
   .navbar {
     padding: 0 15px;
+  }
+}
+
+.logout-btn {
+  display: flex;
+  align-items: center;
+  padding: 7px 15px;
+  border-radius: 6px;
+  background-color: #f0f2f5;
+  color: #333;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+
+  i {
+    margin-right: 6px;
+  }
+
+  &:hover {
+    background-color: #e4e6eb;
+    color: #ff5a5f;
   }
 }

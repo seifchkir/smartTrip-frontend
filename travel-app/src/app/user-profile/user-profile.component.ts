@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, RouterModule } from '@angular/router';
+import { RouterModule } from '@angular/router';
+import { AuthService } from '../services/auth.service';
 
 @Component({
   selector: 'app-user-profile',
@@ -10,17 +11,9 @@ import { ActivatedRoute, RouterModule } from '@angular/router';
   styleUrls: ['./user-profile.component.scss']
 })
 export class UserProfileComponent implements OnInit {
-  // Static user data for demonstration
-  user = {
-    id: '1',
-    firstName: 'John',
-    lastName: 'Doe',
-    email: 'john.doe@example.com',
-    photoUrl: 'https://randomuser.me/api/portraits/men/1.jpg',
-    bio: 'Travel enthusiast | Adventure seeker | Photographer',
-    location: 'New York, USA',
-    joinedDate: 'January 2023'
-  };
+  user: any = {};
+  isLoading = true;
+  error = '';
 
   // Placeholder for future posts
   posts = [
@@ -29,14 +22,37 @@ export class UserProfileComponent implements OnInit {
     { id: 3, placeholder: true }
   ];
 
-  constructor(private route: ActivatedRoute) {}
+  constructor(private authService: AuthService) {}
 
   ngOnInit() {
-    // In the future, we'll fetch the user based on the route parameter
-    this.route.params.subscribe(params => {
-      const userId = params['id'];
-      console.log('User ID from route:', userId);
-      // We'll implement fetching user data here later
+    this.loadUserProfile();
+  }
+
+  loadUserProfile() {
+    this.isLoading = true;
+    this.error = '';
+
+    // Get user email from localStorage
+    const userEmail = localStorage.getItem('userEmail');
+
+    if (!userEmail) {
+      this.error = 'User not found. Please log in again.';
+      this.isLoading = false;
+      return;
+    }
+
+    // Fetch user profile using email
+    this.authService.getUserByEmail(userEmail).subscribe({
+      next: (userData) => {
+        this.user = userData;
+        this.isLoading = false;
+        console.log('User profile loaded:', userData);
+      },
+      error: (err) => {
+        this.error = 'Failed to load user profile: ' + (err.error?.message || err.message || 'Unknown error');
+        this.isLoading = false;
+        console.error('Error loading user profile:', err);
+      }
     });
   }
 }
