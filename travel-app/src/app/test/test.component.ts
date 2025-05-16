@@ -5,7 +5,7 @@ import { CommonModule } from '@angular/common';
   selector: 'app-test',
   standalone: true,
   imports: [CommonModule],
-  template: '<div>Test Component Works!</div>',
-  styles: ['div { padding: 20px; background: #f0f0f0; }']
+  template: '<h1>Test Component Works!</h1>',
+  styles: []
 })
 export class TestComponent {}

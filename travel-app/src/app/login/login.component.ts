@@ -19,7 +19,7 @@ export class LoginComponent implements OnInit {
     password: '',
     rememberMe: false
   };
-  
+
   submitted = false;
   errorMessage = '';
   isLoading = false;
@@ -51,28 +51,43 @@ export class LoginComponent implements OnInit {
     this.authService.login(credentials).subscribe({
       next: (response) => {
         console.log('Login successful:', response);
-        
+
         // Store the auth token
         if (response && response.token) {
           this.authService.setToken(response.token);
+
+          // Fetch user profile using the token
+          this.authService.getCurrentUserProfile().subscribe({
+            next: (userProfile) => {
+              console.log('User profile loaded:', userProfile);
+
+              // Store user profile in localStorage for easy access
+              localStorage.setItem('userProfile', JSON.stringify(userProfile));
+
+              // Navigate to home page after successful login
+              this.router.navigate(['/home']);
+            },
+            error: (profileError) => {
+              console.error('Error loading user profile:', profileError);
+              // Still navigate to home even if profile loading fails
+              this.router.navigate(['/home']);
+            }
+          });
+        } else {
+          // If no token in response, just navigate to home
+          this.router.navigate(['/home']);
         }
-        
-        // Store user email for later use
-        localStorage.setItem('userEmail', credentials.email);
-        
-        // Navigate to home page after successful login
-        this.router.navigate(['/home']);
       },
       error: (error) => {
         console.error('Login error:', error);
         this.errorMessage = error.message || 'Login failed. Please try again.';
-        
+
         // Check if this is an account locked error
         if (this.errorMessage.includes('temporarily locked')) {
           this.errorMessage += ' Would you like to reset your password?';
           this.showResetOption = true;
         }
-        
+
         this.isLoading = false;
       },
       complete: () => {
@@ -87,7 +102,7 @@ export class LoginComponent implements OnInit {
       this.errorMessage = 'Please enter your email address to reset your password.';
       return;
     }
-    
+
     this.isLoading = true;
     this.authService.requestPasswordReset(this.loginData.email).subscribe({
       next: () => {

@@ -20,7 +20,7 @@ export class AuthService {
       'Content-Type': 'application/json',
       'Accept': 'application/json'
     });
-  
+
     // Format the data exactly as the backend expects it
     const requestData = {
       firstName: userData.firstName,
@@ -28,17 +28,17 @@ export class AuthService {
       email: userData.email,
       password: userData.password
     };
-  
+
     console.log('Making registration request to:', `${this.apiUrl}/auth/register`);
     console.log('Request payload:', JSON.stringify(requestData));
-  
+
     return this.http.post(`${this.apiUrl}/auth/register`, requestData, {
       headers
     })
     .pipe(
       catchError(error => {
         console.error('Registration request error details:', error);
-        
+
         // Check if the user already exists
         if (error.status === 400) {
           const errorMessage = error.error?.message || 'Invalid data format';
@@ -47,7 +47,7 @@ export class AuthService {
           }
           return throwError(() => new Error('Registration failed: ' + errorMessage));
         }
-  
+
         return throwError(() => error);
       })
     );
@@ -56,7 +56,7 @@ export class AuthService {
   // Second step: Upload profile photo with the new backend logic
   uploadProfilePhoto(userId: string, photoData: FormData): Observable<any> {
     console.log('Uploading photo with FormData:', Array.from(photoData.entries()));
-  
+
     // Use the exact endpoint from your backend
     return new Observable(observer => {
       fetch(`${this.apiUrl}/users/complete-profile`, {
@@ -90,8 +90,11 @@ export class AuthService {
     return localStorage.getItem('auth_token');
   }
 
+  // Inside your AuthService class
   isLoggedIn(): boolean {
-    return !!this.getToken();
+    const token = this.getToken();
+    console.log('Token exists:', !!token);
+    return !!token;
   }
 
   logout(): void {
@@ -139,39 +142,68 @@ export class AuthService {
     );
   }
 
+  // Add this method to get the current user's profile
+  getCurrentUserProfile(): Observable<any> {
+    const token = this.getToken();
+    if (!token) {
+      return throwError(() => new Error('No authentication token found'));
+    }
+
+    const headers = new HttpHeaders({
+      'Content-Type': 'application/json',
+      'Accept': 'application/json',
+      'Authorization': `Bearer ${token}`
+    });
+
+    return this.http.get(`${this.apiUrl}/auth/me`, { headers })
+      .pipe(
+        catchError(error => {
+          console.error('Error fetching current user profile:', error);
+
+          if (error.status === 401) {
+            // Token is invalid or expired
+            this.logout(); // Clear the invalid token
+            return throwError(() => new Error('Your session has expired. Please login again.'));
+          }
+
+          return throwError(() => error);
+        })
+      );
+  }
+
   // Add a login method to connect with the authenticate endpoint
   // Add or update the login method in your AuthService
   // In the login method of your auth.service.ts
-  
+
   login(credentials: { email: string; password: string }): Observable<any> {
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',
       'Accept': 'application/json'
     });
-  
+
     console.log('Making login request to:', `${this.apiUrl}/auth/authenticate`);
     console.log('Login payload:', JSON.stringify(credentials));
-  
+
     // Try with a different format that might match what the backend expects
     const requestBody = {
       email: credentials.email,
       password: credentials.password
     };
-  
+
     return this.http.post(`${this.apiUrl}/auth/authenticate`, requestBody, {
       headers
     })
     .pipe(
       catchError(error => {
         console.error('Login request error details:', error);
-        
+
         if (error.status === 401) {
           return throwError(() => new Error('Invalid email or password. Please try again.'));
         } else if (error.status === 403) {
           // Account is locked
           return throwError(() => new Error('Your account is temporarily locked. Please try again later or reset your password.'));
         }
-        
+
         // Pass the error through to the component for handling
         return throwError(() => new Error('Login failed. Please try again later.'));
       })
@@ -184,7 +216,7 @@ export class AuthService {
       'Content-Type': 'application/json',
       'Accept': 'application/json'
     });
-  
+
     return this.http.post(`${this.apiUrl}/auth/reset-password-request`, { email }, { headers })
       .pipe(
         catchError(error => {

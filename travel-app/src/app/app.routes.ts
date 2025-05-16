@@ -1,22 +1,36 @@
 import { Routes } from '@angular/router';
-import { UserProfileComponent } from './user-profile/user-profile.component';
-import { HomeComponent } from './home/home.component';
-import { LoginComponent } from './login/login.component';
-import { SignUpComponent } from './sign-up/sign-up.component';
-import { ProfilePhotoComponent } from './profile-photo/profile-photo.component';
-import { TripsComponent } from './trips/trips.component';
-import { TrendingComponent } from './trending/trending.component';
+import { AuthGuard } from './guards/auth.guard';
 import { TestComponent } from './test/test.component';
+import { UserProfileComponent } from './user-profile/user-profile.component';
 
 export const routes: Routes = [
-  { path: '', component: HomeComponent },
-  { path: 'login', component: LoginComponent },
-  { path: 'signup', component: SignUpComponent },
-  { path: 'sign-up', redirectTo: 'signup', pathMatch: 'full' },
-  { path: 'profile-photo', component: ProfilePhotoComponent },
-  { path: 'trips', component: TripsComponent },
-  { path: 'trending', component: TrendingComponent },
-  { path: 'test', component: TestComponent }, // Add test route
-  { path: 'users/:id', component: UserProfileComponent },
-  { path: '**', redirectTo: '' }
+  { path: '', redirectTo: '/home', pathMatch: 'full' },
+  { path: 'login', loadComponent: () => import('./login/login.component').then(m => m.LoginComponent) },
+  { path: 'sign-up', loadComponent: () => import('./sign-up/sign-up.component').then(m => m.SignUpComponent) },
+  {
+    path: 'home',
+    loadComponent: () => import('./home/home.component').then(m => m.HomeComponent),
+    canActivate: [AuthGuard]
+  },
+  // Use direct component reference instead of lazy loading
+  {
+    path: 'profile',
+    component: UserProfileComponent
+  },
+  {
+    path: 'trips',
+    loadComponent: () => import('./trips/trips.component').then(m => m.TripsComponent),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'trending',
+    loadComponent: () => import('./trending/trending.component').then(m => m.TrendingComponent),
+    canActivate: [AuthGuard]
+  },
+  {
+    path: 'test',
+    component: TestComponent
+  },
+  // Add other protected routes here
+  { path: '**', redirectTo: '/home' }
 ];

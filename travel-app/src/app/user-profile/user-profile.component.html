@@ -1,69 +1,181 @@
+<app-navbar></app-navbar>
 <div class="profile-container">
-  <!-- Profile header section -->
-  <div class="profile-header">
-    <div class="profile-cover-photo"></div>
+  <!-- Loading spinner -->
+  <div *ngIf="isLoading" class="loading-spinner">
+    <div class="spinner"></div>
+    <p>Loading profile...</p>
+  </div>
 
-    <div class="profile-info-container">
-      <div class="profile-photo">
-        <img [src]="user.photoUrl" alt="{{ user.firstName }} {{ user.lastName }}">
+  <!-- Error message -->
+  <div *ngIf="error" class="error-message">
+    <p>{{ error }}</p>
+    <button (click)="loadUserProfile()">Try Again</button>
+  </div>
+
+  <!-- Profile content -->
+  <div *ngIf="!isLoading && !error" class="profile-content">
+    <!-- Cover photo and profile section -->
+    <div class="cover-photo">
+      <div class="profile-avatar">
+        <img [src]="user.photoUrl || 'assets/images/default-avatar.png'" alt="Profile Picture">
       </div>
+    </div>
 
-      <div class="profile-info">
-        <h1>{{ user.firstName }} {{ user.lastName }}</h1>
-        <p class="bio">{{ user.bio }}</p>
-        <div class="profile-details">
-          <span><i class="fas fa-map-marker-alt"></i> {{ user.location }}</span>
-          <span><i class="fas fa-calendar-alt"></i> Joined {{ user.joinedDate }}</span>
-          <span><i class="fas fa-envelope"></i> {{ user.email }}</span>
+    <!-- Profile info -->
+    <div class="profile-info">
+      <div class="profile-header">
+        <div class="profile-name-section">
+          <h1 class="profile-name">{{ user.firstName }} {{ user.lastName }}</h1>
+          <p class="profile-location" *ngIf="user.location">
+            <i class="fas fa-map-marker-alt"></i> {{ user.location }}
+          </p>
+        </div>
+        <div class="profile-actions">
+          <button class="btn-follow" *ngIf="!isEditing">Follow</button>
+          <button class="btn-message" *ngIf="!isEditing">Message</button>
+          <button class="btn-edit" *ngIf="!isEditing" (click)="startEditing()">Edit Profile</button>
+          <button class="btn-save" *ngIf="isEditing" (click)="saveProfile()">Save Changes</button>
+          <button class="btn-cancel" *ngIf="isEditing" (click)="cancelEditing()">Cancel</button>
         </div>
       </div>
 
-      <div class="profile-actions">
-        <button class="follow-btn">Follow</button>
-        <button class="message-btn">Message</button>
+      <!-- Edit profile form -->
+      <div class="edit-profile-form" *ngIf="isEditing">
+        <div class="form-group">
+          <label for="firstName">First Name</label>
+          <input type="text" id="firstName" [(ngModel)]="editableUser.firstName">
+        </div>
+        <div class="form-group">
+          <label for="lastName">Last Name</label>
+          <input type="text" id="lastName" [(ngModel)]="editableUser.lastName">
+        </div>
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" [(ngModel)]="editableUser.email" disabled>
+        </div>
+        <div class="form-group">
+          <label for="location">Location</label>
+          <input type="text" id="location" [(ngModel)]="editableUser.location">
+        </div>
+        <div class="form-group">
+          <label for="bio">Bio</label>
+          <textarea id="bio" [(ngModel)]="editableUser.bio" rows="3"></textarea>
+        </div>
+      </div>
+
+      <!-- Profile bio -->
+      <div class="profile-bio" *ngIf="!isEditing && user.bio">
+        <p>{{ user.bio }}</p>
+      </div>
+
+      <!-- Profile stats -->
+      <div class="profile-stats" *ngIf="!isEditing">
+        <div class="stat">
+          <span class="stat-value">{{ posts.length }}</span>
+          <span class="stat-label">Posts</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">{{ photos.length }}</span>
+          <span class="stat-label">Photos</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">{{ trips.length }}</span>
+          <span class="stat-label">Trips</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">245</span>
+          <span class="stat-label">Followers</span>
+        </div>
+        <div class="stat">
+          <span class="stat-value">118</span>
+          <span class="stat-label">Following</span>
+        </div>
       </div>
     </div>
-  </div>
 
-  <!-- Profile navigation -->
-  <div class="profile-nav">
-    <ul>
-      <li class="active">Posts</li>
-      <li>Photos</li>
-      <li>Trips</li>
-      <li>About</li>
-    </ul>
-  </div>
+    <!-- Profile tabs -->
+    <div class="profile-tabs">
+      <div class="tab" [class.active]="activeTab === 'posts'" (click)="setActiveTab('posts')">Posts</div>
+      <div class="tab" [class.active]="activeTab === 'photos'" (click)="setActiveTab('photos')">Photos</div>
+      <div class="tab" [class.active]="activeTab === 'trips'" (click)="setActiveTab('trips')">Trips</div>
+      <div class="tab" [class.active]="activeTab === 'about'" (click)="setActiveTab('about')">About</div>
+    </div>
 
-  <!-- Posts section (placeholder for future implementation) -->
-  <div class="posts-container">
-    <h2>Posts</h2>
-
-    <div class="posts-grid">
-      <div class="post-placeholder" *ngFor="let post of posts">
-        <div class="post-content">
+    <!-- Tab content -->
+    <div class="tab-content">
+      <!-- Posts tab -->
+      <div *ngIf="activeTab === 'posts'" class="posts-container">
+        <div *ngFor="let post of posts" class="post-card">
           <div class="post-header">
-            <div class="post-avatar">
-              <img [src]="user.photoUrl" alt="{{ user.firstName }}">
-            </div>
+            <img [src]="user.photoUrl || 'assets/images/default-avatar.png'" alt="Profile Picture" class="post-avatar">
             <div class="post-info">
               <h3>{{ user.firstName }} {{ user.lastName }}</h3>
-              <p class="post-time">Just now</p>
+              <p class="post-date">{{ post.date }}</p>
             </div>
           </div>
-
-          <div class="post-body">
-            <div class="post-text-placeholder"></div>
-            <div class="post-text-placeholder short"></div>
-          </div>
-
-          <div class="post-image-placeholder"></div>
-
+          <h2 class="post-title">{{ post.title }}</h2>
+          <p class="post-content">{{ post.content }}</p>
+          <img *ngIf="post.image" [src]="post.image" alt="Post image" class="post-image">
           <div class="post-actions">
-            <button><i class="fas fa-thumbs-up"></i> Like</button>
-            <button><i class="fas fa-comment"></i> Comment</button>
-            <button><i class="fas fa-share"></i> Share</button>
+            <button class="btn-like"><i class="far fa-heart"></i> {{ post.likes }}</button>
+            <button class="btn-comment"><i class="far fa-comment"></i> {{ post.comments }}</button>
+            <button class="btn-share"><i class="far fa-share-square"></i> Share</button>
           </div>
+        </div>
+      </div>
+
+      <!-- Photos tab -->
+      <div *ngIf="activeTab === 'photos'" class="photos-container">
+        <div class="photo-grid">
+          <div *ngFor="let photo of photos" class="photo-item">
+            <img [src]="photo.url" alt="Photo" class="photo-image">
+            <div class="photo-caption">{{ photo.caption }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Trips tab -->
+      <div *ngIf="activeTab === 'trips'" class="trips-container">
+        <div *ngFor="let trip of trips" class="trip-card">
+          <div class="trip-header">
+            <h3>{{ trip.destination }}</h3>
+            <span class="trip-status" [class.completed]="trip.status === 'Completed'" [class.upcoming]="trip.status === 'Upcoming'">
+              {{ trip.status }}
+            </span>
+          </div>
+          <div class="trip-dates">
+            <i class="far fa-calendar"></i>
+            {{ trip.startDate }} - {{ trip.endDate }}
+          </div>
+          <button class="btn-trip-details">View Details</button>
+        </div>
+      </div>
+
+      <!-- About tab -->
+      <div *ngIf="activeTab === 'about'" class="about-container">
+        <div class="about-section">
+          <h3>Basic Information</h3>
+          <div class="about-item">
+            <span class="about-label">Name:</span>
+            <span class="about-value">{{ user.firstName }} {{ user.lastName }}</span>
+          </div>
+          <div class="about-item">
+            <span class="about-label">Email:</span>
+            <span class="about-value">{{ user.email }}</span>
+          </div>
+          <div class="about-item" *ngIf="user.location">
+            <span class="about-label">Location:</span>
+            <span class="about-value">{{ user.location }}</span>
+          </div>
+          <div class="about-item">
+            <span class="about-label">Joined:</span>
+            <span class="about-value">{{ user.joinedDate || 'January 2023' }}</span>
+          </div>
+        </div>
+
+        <div class="about-section">
+          <h3>Bio</h3>
+          <p>{{ user.bio || 'No bio provided yet.' }}</p>
         </div>
       </div>
     </div>
