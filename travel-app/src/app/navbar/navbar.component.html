@@ -24,7 +24,8 @@
   <div class="auth-buttons">
     <!-- Profile icon shown only when logged in -->
     <div class="profile-icon" *ngIf="isLoggedIn" [routerLink]="['/users', userId]" style="cursor: pointer;">
-      <img *ngIf="profilePhotoUrl" [src]="profilePhotoUrl" alt="User Profile" class="profile-photo">
+      <img *ngIf="profilePhotoUrl" [src]="profilePhotoUrl" alt="User Profile" class="profile-photo"
+           (error)="profilePhotoUrl = 'assets/images/default-avatar.svg'">
       <i *ngIf="!profilePhotoUrl" class="fas fa-user"></i>
     </div>
 

@@ -67,59 +67,28 @@ export class SignUpComponent implements OnInit {
         next: (response) => {
           console.log('Registration successful, full response:', response);
 
-          // Log the response structure to better understand it
-          console.log('Response type:', typeof response);
-          console.log('Response keys:', Object.keys(response));
-
-          // Extract the ID from the response, checking various possible locations
-          let userId = null;
-
-          // If response is HttpResponse object (when using observe: 'response')
-          if (response.body) {
-            console.log('Response body keys:', Object.keys(response.body));
-            userId = response.body.id || response.body._id || response.body.userId ||
-                    (response.body.user && (response.body.user.id || response.body.user._id));
-
-            // If response body contains data property (common in API responses)
-            if (response.body.data) {
-              userId = response.body.data.id || response.body.data._id || response.body.data.userId ||
-                      (response.body.data.user && (response.body.data.user.id || response.body.data.user._id));
-            }
-          } else {
-            // Direct response object
-            console.log('Direct response keys:', Object.keys(response));
-            userId = response.id || response._id || response.userId ||
-                    (response.user && (response.user.id || response.user._id));
-
-            // If response contains data property
-            if (response.data) {
-              userId = response.data.id || response.data._id || response.data.userId ||
-                      (response.data.user && (response.data.user.id || response.data.user._id));
-            }
-          }
-
-          console.log('Extracted user ID:', userId);
-
-          // For testing purposes, if no ID is found, create a temporary one
-          if (!userId) {
-            console.warn('Could not find user ID in response. Using temporary ID for testing.');
-            userId = 'temp-' + Date.now();
-          }
-
-          // Store user data including the ID returned from the backend
+          // Store user data for the next step
           const userDataForStorage = {
             ...userData,
-            id: userId
+            id: response?.id || response?.userId || response?.user?.id || 'temp-' + Date.now()
           };
 
           console.log('Storing user data:', userDataForStorage);
           localStorage.setItem('signupData', JSON.stringify(userDataForStorage));
-
-          // Store email separately for easier access
           localStorage.setItem('userEmail', userData.email);
 
+          // Store the token if it exists in the response
+          if (response?.token) {
+            this.authService.setToken(response.token);
+          }
+
           // Navigate to the photo upload page
-          this.router.navigate(['/profile-photo']);
+          this.router.navigate(['/profile-photo']).then(success => {
+            if (!success) {
+              console.error('Navigation to profile-photo failed');
+              this.errorMessage = 'Failed to proceed to profile photo upload. Please try again.';
+            }
+          });
         },
         error: (error) => {
           console.error('Registration error:', error);

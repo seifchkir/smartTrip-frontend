@@ -41,11 +41,25 @@ export class NavbarComponent implements OnInit {
       if (this.isLoggedIn && userEmail) {
         this.getUserDetails(userEmail).subscribe(
           (userData) => {
-            this.profilePhotoUrl = userData.photoUrl || 'assets/default-avatar.png'; // Fallback to default image
+            const serverUrl = 'http://localhost:8080'; // Change to your backend URL
+            let photoUrl = userData.photoUrl;
+            // Only set default if photoUrl is missing or empty
+            if (!photoUrl || photoUrl.trim() === '') {
+              this.profilePhotoUrl = 'assets/images/default-avatar.svg';
+            } else if (!photoUrl.startsWith('http') && !photoUrl.startsWith('assets')) {
+              this.profilePhotoUrl = serverUrl + photoUrl;
+            } else {
+              // If using Unsplash or similar, request a smaller image for the navbar
+              if (photoUrl.includes('images.unsplash.com')) {
+                this.profilePhotoUrl = photoUrl + (photoUrl.includes('?') ? '&' : '?') + 'w=64&h=64&fit=crop';
+              } else {
+                this.profilePhotoUrl = photoUrl;
+              }
+            }
           },
           (error) => {
             console.error('Error fetching user details:', error);
-            this.profilePhotoUrl = 'assets/default-avatar.png'; // Use default on error
+            this.profilePhotoUrl = 'assets/images/default-avatar.svg'; // Use default on error
           }
         );
       }

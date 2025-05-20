@@ -8,7 +8,7 @@ import { NavbarComponent } from "../navbar/navbar.component";
 @Component({
   selector: 'app-profile-photo',
   standalone: true,
-  imports: [CommonModule, RouterModule, HttpClientModule, NavbarComponent],
+  imports: [CommonModule, RouterModule, HttpClientModule],
   providers: [AuthService],
   templateUrl: './profile-photo.component.html',
   styleUrls: ['./profile-photo.component.scss']
@@ -29,12 +29,23 @@ export class ProfilePhotoComponent implements OnInit {
     // Retrieve user data from localStorage
     const data = localStorage.getItem('signupData');
     if (!data) {
+      console.error('No signup data found in localStorage');
       // If no data is found, redirect back to signup
-      this.router.navigate(['/signup']);
+      this.router.navigate(['/sign-up']).then(success => {
+        if (!success) {
+          console.error('Navigation to sign-up failed');
+        }
+      });
       return;
     }
-    this.userData = JSON.parse(data);
-    console.log('Profile photo component initialized with user data:', this.userData);
+
+    try {
+      this.userData = JSON.parse(data);
+      console.log('Profile photo component initialized with user data:', this.userData);
+    } catch (error) {
+      console.error('Error parsing signup data:', error);
+      this.router.navigate(['/sign-up']);
+    }
   }
 
   onFileUploadClick() {

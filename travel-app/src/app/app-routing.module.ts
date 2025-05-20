@@ -6,6 +6,7 @@ import { LoginComponent } from './login/login.component';
 import { ProfilePhotoComponent } from './profile-photo/profile-photo.component';
 // Import the trips component
 import { TripsComponent } from './trips/trips.component';
+import { ProfileComponent } from './profile/profile.component';
 
 const routes: Routes = [
   { path: '', redirectTo: 'home', pathMatch: 'full' },
@@ -14,7 +15,8 @@ const routes: Routes = [
   { path: 'login', component: LoginComponent },
   { path: 'profile-photo', component: ProfilePhotoComponent },
   // Add the trips route
-  { path: 'trips', component: TripsComponent }
+  { path: 'trips', component: TripsComponent },
+  { path: 'profile-new', component: ProfileComponent }
 ];
 
 @NgModule({
