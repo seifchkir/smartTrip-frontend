@@ -88,7 +88,15 @@ export class UserProfileComponent implements OnInit {
 
                 // Set default values for missing fields
                 post.userName = post.userName || (this.user.firstName + ' ' + this.user.lastName);
+
+                // Use user's photoUrl instead of placeholder
                 post.userPhoto = post.userPhoto || this.user.photoUrl;
+
+                // If post image is a placeholder, use user's photo instead
+                if (!post.imageUrl || post.imageUrl.includes('placeholder.com')) {
+                  post.imageUrl = this.user.photoUrl || 'assets/images/default-post.jpg';
+                }
+
                 post.title = post.title || 'My Travel Experience';
                 post.likes = post.likes || 0;
                 post.comments = post.comments || 0;

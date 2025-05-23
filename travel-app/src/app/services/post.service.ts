@@ -23,16 +23,27 @@ export class PostService {
     const userId = this.getUserId();
     if (userId) {
       const headers = this.getAuthHeaders();
-      this.http.get<any[]>(`${environment.apiUrl}/posts/user/${userId}`, { headers })
+      // Updated URL to match the correct endpoint
+      this.http.get<any[]>(`${environment.apiUrl}/social/user/posts`, { headers })
         .subscribe({
           next: (posts) => {
             console.log('Loaded user posts:', posts);
-            this.postsSubject.next(posts);
+
+            // Convert object to array if needed
+            let postsArray = posts;
+            if (posts && !Array.isArray(posts)) {
+              postsArray = Object.values(posts);
+            }
+
+            this.postsSubject.next(postsArray);
           },
           error: (error) => {
             console.error('Error loading user posts:', error);
+            this.postsSubject.next([]);
           }
         });
+    } else {
+      this.postsSubject.next([]);
     }
   }
 
@@ -94,5 +105,22 @@ export class PostService {
     return new HttpHeaders({
       'Authorization': `Bearer ${token}`
     });
+  }
+
+  // Add a method to get user's photo URL
+  getUserPhotoUrl(): string {
+    const userProfile = localStorage.getItem('userProfile');
+    if (userProfile) {
+      try {
+        const profile = JSON.parse(userProfile);
+        if (profile && profile.photoUrl) {
+          return profile.photoUrl;
+        }
+      } catch (e) {
+        console.error('Error parsing user profile:', e);
+      }
+    }
+    // Return a default image path if no photo URL is found
+    return 'assets/images/default-user.jpg';
   }
 }

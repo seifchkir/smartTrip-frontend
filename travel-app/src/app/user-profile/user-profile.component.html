@@ -93,17 +93,23 @@
 
         <div *ngFor="let post of posts" class="post-card">
           <div class="post-header">
-            <img [src]="post.userPhoto || 'assets/images/default-avatar.png'" alt="Profile Picture" class="post-avatar"
-                 width="40" height="40" loading="lazy" style="object-fit: cover; border-radius: 50%;">
+            <img [src]="user.photoUrl || 'assets/images/default-avatar.png'" alt="Profile Picture"
+                 width="45" height="45" loading="lazy" style="object-fit: cover; border-radius: 50%; margin-right: 12px;">
             <div class="post-info">
-              <h3>{{ post.userName || 'Unknown User' }}</h3>
+              <h3>{{ user.firstName }} {{ user.lastName }}</h3>
               <p class="post-date">{{ post.createdAt | date:'medium' }}</p>
             </div>
           </div>
           <h2 class="post-title">{{ post.title || 'Untitled Post' }}</h2>
           <p class="post-content">{{ post.text }}</p>
-          <img *ngIf="post.imageUrl" [src]="post.imageUrl" alt="Post image" class="post-image"
-               width="600" height="400" loading="lazy" style="object-fit: cover;">
+          <img *ngIf="post.imageUrl"
+     [src]="post.imageUrl"
+     alt="Post image"
+     class="post-image"
+     loading="lazy"
+     style="max-width: 100%; height: auto; max-height: 600px; object-fit: contain; border-radius: 8px; display: block; margin: 0 auto 15px auto;">
+
+
           <div class="post-actions">
             <button class="btn-like"><i class="far fa-heart"></i> {{ post.likes || 0 }}</button>
             <button class="btn-comment"><i class="far fa-comment"></i> {{ post.comments || 0 }}</button>
@@ -114,17 +120,20 @@
 
       <!-- Photos tab -->
       <div *ngIf="activeTab === 'photos'" class="photos-container">
-        <!-- Photos content remains unchanged -->
+        <!-- This section might contain placeholder images -->
+        <!-- You need to check and update any img tags here -->
       </div>
 
       <!-- Trips tab -->
       <div *ngIf="activeTab === 'trips'" class="trips-container">
-        <!-- Trips content remains unchanged -->
+        <!-- This section might contain placeholder images -->
+        <!-- You need to check and update any img tags here -->
       </div>
 
       <!-- About tab -->
       <div *ngIf="activeTab === 'about'" class="about-container">
-        <!-- About content remains unchanged -->
+        <!-- This section might contain placeholder images -->
+        <!-- You need to check and update any img tags here -->
       </div>
     </div>
   </div>

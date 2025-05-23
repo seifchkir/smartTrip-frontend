@@ -314,13 +314,18 @@
       margin-bottom: 15px;
     }
 
-    .post-image {
-      width: 100%;
-      max-height: 500px;
-      border-radius: 8px;
-      margin-bottom: 15px;
-      object-fit: cover;
-    }
+   .post-image {
+  width: auto;
+  height: auto;
+  max-width: 100%;
+  max-height: 600px;
+  display: block;
+  margin: 0 auto 15px auto;
+  object-fit: contain;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); // Optional visual boost
+}
+
 
     .post-actions {
       display: flex;
