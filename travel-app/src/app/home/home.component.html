@@ -12,15 +12,58 @@
         <div class="planner-content">
           <div class="planner-input-group">
             <textarea
-              placeholder="Describe your perfect trip...
-Example: I want to plan a 5-day beach vacation in Greece with my family. We love water activities and local cuisine."
+              [(ngModel)]="tripQuery"
+              placeholder="Describe your perfect trip...\nExample: I want to plan a 5-day beach vacation in Greece with my family. We love water activities and local cuisine."
               rows="3"
               class="trip-description"></textarea>
 
-            <button class="plan-trip-btn">
+            <button class="plan-trip-btn" (click)="analyzeTripQuery()" [disabled]="isLoading">
               <i class="fas fa-magic"></i>
-              Generate My Trip
+              {{ isLoading ? 'Generating...' : 'Generate My Trip' }}
             </button>
+          </div>
+
+          <!-- Error message -->
+          <div *ngIf="error" class="error-message">
+            {{ error }}
+          </div>
+
+          <!-- Trip plan result -->
+          <!-- Trip plan result section -->
+          <div *ngIf="tripPlan" class="trip-plan-result">
+            <h3>Your Trip Plan</h3>
+
+            <!-- Trip summary badges -->
+            <div class="trip-summary-card">
+              <span class="badge" *ngFor="let badge of badges" [style.background-color]="badge.color">
+                <i class="fas {{badge.icon}}"></i> {{badge.label}}
+              </span>
+            </div>
+
+            <!-- Destination header -->
+            <div class="destination-header">
+              <img [src]="destinationImage" alt="{{destinationName}}" class="destination-image">
+              <h4>{{destinationName}}</h4>
+            </div>
+
+            <!-- Itinerary section -->
+            <div class="itinerary-section">
+              <h4>Itinerary</h4>
+
+              <div class="itinerary-grid">
+                <div class="itinerary-day" *ngFor="let day of itineraryDays">
+                  <div class="day-header">
+                    <h5>{{day.title}}</h5>
+                  </div>
+                  <!-- In your itinerary day template -->
+                  <div class="day-content">
+                    <div *ngFor="let step of day.steps" class="step" [ngClass]="getStepClass(step)">
+                      {{step}}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
