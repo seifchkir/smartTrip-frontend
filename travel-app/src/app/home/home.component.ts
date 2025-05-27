@@ -5,42 +5,48 @@ import { NavbarComponent } from '../navbar/navbar.component';
 import { FormsModule } from '@angular/forms';
 import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { environment } from '../../environments/environment';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { TripDetailsDialogComponent } from '../trip-details-dialog/trip-details-dialog.component';
 
 @Component({
   selector: 'app-home',
   standalone: true,
-  imports: [CommonModule, RouterModule, NavbarComponent, FormsModule, HttpClientModule],
+  imports: [
+    CommonModule,
+    RouterModule,
+    NavbarComponent,
+    FormsModule,
+    HttpClientModule,
+    MatDialogModule, // Add this import
+  ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent {
   destinations = [
     {
-      name: 'Santorini, Greece',
-      description: 'Experience the magic of white-washed buildings and stunning sunsets',
-      image: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
-      likes: 1245,
-      comments: 89,
-      userAvatar: 'https://randomuser.me/api/portraits/women/44.jpg',
-      userName: 'Sarah Johnson'
-    },
-    {
-      name: 'Kyoto, Japan',
-      description: 'Discover ancient temples and beautiful cherry blossoms',
-      image: 'https://images.unsplash.com/photo-1492571350019-22de08371fd3?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
-      likes: 987,
-      comments: 67,
-      userAvatar: 'https://randomuser.me/api/portraits/men/32.jpg',
-      userName: 'Michael Chen'
-    },
-    {
       name: 'Bali, Indonesia',
-      description: 'Tropical paradise with rich culture and beautiful beaches',
-      image: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
-      likes: 1567,
-      comments: 112,
-      userAvatar: 'https://randomuser.me/api/portraits/women/68.jpg',
-      userName: 'Emma Wilson'
+      image: 'https://images.unsplash.com/photo-1537996194471-e657df975ab4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    },
+    {
+      name: 'Santorini, Greece',
+      image: 'https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    },
+    {
+      name: 'Tokyo, Japan',
+      image: 'https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    },
+    {
+      name: 'Paris, France',
+      image: 'https://images.unsplash.com/photo-1502602898657-3e91760cbb34?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    },
+    {
+      name: 'New York, USA',
+      image: 'https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
+    },
+    {
+      name: 'Barcelona, Spain',
+      image: 'https://images.unsplash.com/photo-1583422409516-2895a77efded?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80',
     }
   ];
 
@@ -77,7 +83,7 @@ export class HomeComponent {
   badges: { label: string, icon: string, color: string }[] = [];
   destinationImage: string = '';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private dialog: MatDialog) {}
 
   // Method to analyze trip query
   async analyzeTripQuery() {
@@ -104,6 +110,9 @@ export class HomeComponent {
       if (response) {
         this.tripPlan = response;
         this.parseTripPlan();
+
+        // Open the dialog after parsing the trip plan
+        this.openTripDetailsDialog();
       } else {
         this.error = 'Received empty response from server';
       }
@@ -309,5 +318,25 @@ export class HomeComponent {
       return 'cultural';
 
     return '';
+  }
+
+  openTripDetailsDialog(): void {
+    const dialogRef = this.dialog.open(TripDetailsDialogComponent, {
+      width: '100vw',
+      height: '100vh',
+      maxWidth: '100vw',
+      maxHeight: '100vh',
+      panelClass: 'full-screen-dialog',
+      data: {
+        destinationName: this.destinationName,
+        destinationImage: this.destinationImage,
+        badges: this.badges,
+        itineraryDays: this.itineraryDays
+      }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      console.log('The dialog was closed');
+    });
   }
 }

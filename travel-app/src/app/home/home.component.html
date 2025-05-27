@@ -102,84 +102,138 @@
 -->
 
 
-  <!-- Featured Destinations -->
-  <section class="featured-destinations">
+  <!-- How It Works Section -->
+  <section class="how-it-works">
+    <div class="section-header">
+      <h2>How It Works</h2>
+      <div class="section-divider"></div>
+    </div>
+    <div class="steps-container">
+      <div class="step-card">
+        <div class="step-icon">
+          <i class="fas fa-map"></i>
+        </div>
+        <h3>Describe Your Dream Trip</h3>
+        <p>Tell us where you want to go, what you love doing, and your travel style.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-icon">
+          <i class="fas fa-calendar-alt"></i>
+        </div>
+        <h3>Get a Custom Itinerary</h3>
+        <p>Our smart planner creates a day-by-day itinerary tailored to your preferences.</p>
+      </div>
+      <div class="step-card">
+        <div class="step-icon">
+          <i class="fas fa-globe"></i>
+        </div>
+        <h3>Share Your Adventures</h3>
+        <p>Connect with other travelers, share tips, and showcase your journeys.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Popular Destinations -->
+  <section class="popular-destinations">
     <div class="section-header">
       <h2>Popular Destinations</h2>
-      <p>Discover the most loved places by our community</p>
+      <div class="section-divider"></div>
     </div>
     <div class="destinations-grid">
-      <div class="destination-card" *ngFor="let destination of destinations">
-        <div class="destination-image">
-          <img [src]="destination.image" [alt]="destination.name">
-          <div class="destination-overlay">
-            <div class="stats">
-              <span><i class="fas fa-heart"></i> {{destination.likes}}</span>
-              <span><i class="fas fa-comment"></i> {{destination.comments}}</span>
-            </div>
-          </div>
+      <div class="destination-card">
+        <img src="https://images.unsplash.com/photo-1537996194471-e657df975ab4?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Bali, Indonesia" class="destination-img">
+        <div class="destination-content">
+          <h3>Bali, Indonesia</h3>
         </div>
-        <div class="destination-info">
-          <h3>{{destination.name}}</h3>
-          <p>{{destination.description}}</p>
-          <div class="user-info">
-            <img [src]="destination.userAvatar" [alt]="destination.userName">
-            <span>{{destination.userName}}</span>
-          </div>
+      </div>
+      <div class="destination-card">
+        <img src="https://images.unsplash.com/photo-1570077188670-e3a8d69ac5ff?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Santorini, Greece" class="destination-img">
+        <div class="destination-content">
+          <h3>Santorini, Greece</h3>
+        </div>
+      </div>
+      <div class="destination-card">
+        <img src="https://images.unsplash.com/photo-1540959733332-eab4deabeeaf?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Tokyo, Japan" class="destination-img">
+        <div class="destination-content">
+          <h3>Tokyo, Japan</h3>
+        </div>
+      </div>
+      <div class="destination-card">
+        <img src="https://images.unsplash.com/photo-1502602898657-3e91760cbb34?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Paris, France" class="destination-img">
+        <div class="destination-content">
+          <h3>Paris, France</h3>
+        </div>
+      </div>
+      <div class="destination-card">
+        <img src="https://images.unsplash.com/photo-1496442226666-8d4d0e62e6e9?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="New York, USA" class="destination-img">
+        <div class="destination-content">
+          <h3>New York, USA</h3>
+        </div>
+      </div>
+      <div class="destination-card">
+        <img src="https://images.unsplash.com/photo-1583422409516-2895a77efded?ixlib=rb-4.0.3&auto=format&fit=crop&w=800&q=80" alt="Barcelona, Spain" class="destination-img">
+        <div class="destination-content">
+          <h3>Barcelona, Spain</h3>
         </div>
       </div>
     </div>
   </section>
 
-  <!-- Trending Experiences -->
-  <section class="trending-section">
-    <div class="section-header">
-      <h2>Trending Experiences</h2>
-      <p>Most popular activities this week</p>
-    </div>
-    <div class="trending-tags">
-      <span class="tag">#BeachLife</span>
-      <span class="tag">#CityBreak</span>
-      <span class="tag">#Adventure</span>
-      <span class="tag">#LocalFood</span>
-      <span class="tag">#Culture</span>
-      <span class="tag">#Nature</span>
-    </div>
-  </section>
 
-  <!-- Community Section -->
-  <section class="community-section">
-    <div class="section-header">
-      <h2>Join Our Community</h2>
-      <p>Connect with travelers from around the world</p>
-    </div>
-    <div class="community-stats">
-      <div class="stat">
-        <span class="number">10K+</span>
-        <span class="label">Active Travelers</span>
-      </div>
-      <div class="stat">
-        <span class="number">5K+</span>
-        <span class="label">Shared Stories</span>
-      </div>
-      <div class="stat">
-        <span class="number">100+</span>
-        <span class="label">Destinations</span>
-      </div>
-    </div>
-    <div class="testimonials">
-      <div class="testimonial-card" *ngFor="let testimonial of testimonials">
-        <div class="testimonial-content">
-          <p>"{{testimonial.text}}"</p>
-          <div class="testimonial-author">
-            <img [src]="testimonial.avatar" [alt]="testimonial.name">
-            <div class="author-info">
-              <h4>{{testimonial.name}}</h4>
-              <span>{{testimonial.location}}</span>
-            </div>
+
+
+
+    <!-- Footer -->
+    <footer class="footer">
+      <div class="footer-content">
+        <div class="footer-column">
+          <div class="footer-logo">
+            <i class="fas fa-map-marked-alt"></i>
+            <h3>SmartTrip</h3>
+          </div>
+          <p class="footer-description">
+            Discover, plan, and share your perfect travel adventures with fellow explorers.
+          </p>
+          <div class="social-icons">
+            <a href="#"><i class="fab fa-instagram"></i></a>
+            <a href="#"><i class="fab fa-twitter"></i></a>
+            <a href="#"><i class="fab fa-facebook-f"></i></a>
+          </div>
+        </div>
+
+        <div class="footer-column">
+          <h4>Features</h4>
+          <ul>
+            <li><a href="#">Trip Planner</a></li>
+            <li><a href="#">Destinations</a></li>
+            <li><a href="#">Travel Tips</a></li>
+            <li><a href="#">Community</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-column">
+          <h4>Company</h4>
+          <ul>
+            <li><a href="#">About Us</a></li>
+            <li><a href="#">Careers</a></li>
+            <li><a href="#">Privacy Policy</a></li>
+            <li><a href="#">Terms of Service</a></li>
+          </ul>
+        </div>
+
+        <div class="footer-column">
+          <h4>Connect</h4>
+          <p>Subscribe to our newsletter for travel updates and inspiration.</p>
+          <div class="newsletter-form">
+            <input type="email" placeholder="Your email">
+            <button type="submit">Subscribe</button>
           </div>
         </div>
       </div>
-    </div>
-  </section>
+
+      <div class="footer-bottom">
+        <p>© 2025 SmartTrip. All rights reserved.</p>
+      </div>
+    </footer>
+  
 </div>

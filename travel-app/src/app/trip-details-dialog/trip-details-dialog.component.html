@@ -1,0 +1,178 @@
+<div class="trip-details-dialog">
+  <!-- Hero Section with Banner Image -->
+  <div class="hero-banner" [style.background-image]="'linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(' + data.destinationImage + ')'">
+    <div class="hero-content" @fadeIn>
+      <h1>{{data.destinationName}}</h1>
+
+      <!-- Trip Summary Badges -->
+      <div class="trip-summary-badges">
+        <span class="badge" *ngFor="let badge of data.badges" [style.background-color]="badge.color">
+          <i class="fas {{badge.icon}}"></i> {{badge.label}}
+        </span>
+      </div>
+    </div>
+
+    <button class="close-button" (click)="closeDialog()">
+      <i class="fas fa-times"></i>
+    </button>
+  </div>
+
+  <!-- Tabs Navigation -->
+  <!-- Make sure your mat-tab-group has the selectedTabChange event binding -->
+  <mat-tab-group animationDuration="300ms" [(selectedIndex)]="activeTab" (selectedTabChange)="onTabChange($event)" class="trip-tabs">
+    <mat-tab label="Overview">
+      <div class="tab-content" @fadeIn>
+        <div class="overview-section">
+          <h2>Trip Overview</h2>
+          <p class="trip-intro">{{tripOverviewText}}</p>
+
+          <!-- Rest of the overview content -->
+          <div class="trip-summary">
+            <div class="summary-item">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>{{data.destinationName}}</span>
+            </div>
+            <div class="summary-item">
+              <i class="fas fa-calendar-alt"></i>
+              <span>{{data.itineraryDays?.length || 0}} days</span>
+            </div>
+            <div class="summary-item" *ngIf="getTripStyle()">
+              <i class="fas fa-compass"></i>
+              <span>{{getTripStyle()}}</span>
+            </div>
+            <div class="summary-item" *ngIf="getTotalBudget()">
+              <i class="fas fa-dollar-sign"></i>
+              <span>{{getTotalBudget()}}</span>
+            </div>
+          </div>
+
+          <!-- Trip Highlights -->
+          <h2>Trip Highlights</h2>
+          <ul class="trip-highlights">
+            <li *ngFor="let highlight of getHighlights()">
+              <i class="fas fa-star"></i>
+              <span>{{highlight}}</span>
+            </li>
+          </ul>
+
+          <!-- Budget Breakdown -->
+          <h2>Budget Breakdown</h2>
+          <div class="budget-breakdown">
+            <div class="budget-item" *ngFor="let item of getBudgetBreakdown()">
+              <div class="budget-icon" [ngClass]="item.class">
+                <i class="fas {{item.icon}}"></i>
+              </div>
+              <div class="budget-details">
+                <p>{{item.category}}: {{item.amount}} ({{item.description}})</p>
+              </div>
+            </div>
+            <div class="budget-item total-budget">
+              <div class="budget-icon total-icon">
+                <i class="fas fa-dollar-sign"></i>
+              </div>
+              <div class="budget-details">
+                <p><strong>Total budget: {{getTotalBudget()}}</strong></p>
+              </div>
+            </div>
+          </div>
+
+          <!-- Personalization Hint -->
+          <div class="personalization-hint" *ngIf="getPersonalizationHint()">
+            <i class="fas fa-user-check"></i>
+            <p>{{getPersonalizationHint()}}</p>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Itinerary">
+      <div class="tab-content" @fadeIn>
+        <div class="timeline-section">
+          <div class="timeline" *ngFor="let day of data.itineraryDays; let i = index">
+            <div class="timeline-header" @slideIn>
+              <div class="day-number">{{i+1}}</div>
+              <h3>{{day.title.replace('Day ' + (i+1) + ':', '')}}</h3>
+            </div>
+
+            <div class="timeline-content">
+              <div class="timeline-item" *ngFor="let step of day.steps; let j = index" [ngClass]="getStepClass(step)" @slideIn [style.animation-delay]="(j * 0.1) + 's'">
+                <div class="timeline-icon">
+                  <i class="fas"
+                    [ngClass]="{
+                      'fa-sun': getStepClass(step) === 'morning-activity',
+                      'fa-cloud-sun': getStepClass(step) === 'afternoon-activity',
+                      'fa-moon': getStepClass(step) === 'evening-activity',
+                      'fa-car': getStepClass(step) === 'transportation',
+                      'fa-bed': getStepClass(step) === 'accommodation',
+                      'fa-utensils': getStepClass(step) === 'dining',
+                      'fa-hiking': getStepClass(step) === 'hiking',
+                      'fa-water': getStepClass(step) === 'water-activity',
+                      'fa-mountain': getStepClass(step) === 'adventure',
+                      'fa-landmark': getStepClass(step) === 'cultural',
+                      'fa-map-marker-alt': getStepClass(step) === ''
+                    }">
+                  </i>
+                </div>
+                <div class="timeline-content-box">
+                  <p>{{step}}</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Map">
+      <div class="tab-content">
+        <div class="map-section">
+          <h2>Trip Map</h2>
+          <p>Interactive map showing your destination and key locations from your itinerary.</p>
+          <div class="map-container">
+            <div id="map-container" style="height: 400px; width: 100%; border-radius: 8px;"></div>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Photos">
+      <div class="tab-content" @fadeIn>
+        <div class="photos-section">
+          <h2>Destination Photos</h2>
+          <div class="photos-grid">
+            <!-- Placeholder images - in a real app, you'd fetch actual destination photos -->
+            <div class="photo-card" *ngFor="let i of [1,2,3,4,5,6]" @slideIn>
+              <img [src]="'https://source.unsplash.com/400x300/?' + encodeURI(data.destinationName) + ',travel,' + i" alt="Destination photo">
+            </div>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+
+    <mat-tab label="Share">
+      <div class="tab-content" @fadeIn>
+        <div class="share-section">
+          <h2>Save & Share Your Trip</h2>
+          <div class="share-options">
+            <button class="share-button">
+              <i class="fas fa-download"></i>
+              Download PDF
+            </button>
+            <button class="share-button">
+              <i class="fas fa-envelope"></i>
+              Email Itinerary
+            </button>
+            <button class="share-button">
+              <i class="fas fa-share-alt"></i>
+              Share
+            </button>
+            <button class="share-button">
+              <i class="fas fa-heart"></i>
+              Save to Favorites
+            </button>
+          </div>
+        </div>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</div>
