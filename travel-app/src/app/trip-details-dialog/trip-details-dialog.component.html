@@ -24,7 +24,7 @@
       <div class="tab-content" @fadeIn>
         <div class="overview-section">
           <h2>Trip Overview</h2>
-          <p class="trip-intro">{{tripOverviewText}}</p>
+          <p class="trip-intro">{{getOverviewParagraph()}}</p>
 
           <!-- Rest of the overview content -->
           <div class="trip-summary">
@@ -63,15 +63,7 @@
                 <i class="fas {{item.icon}}"></i>
               </div>
               <div class="budget-details">
-                <p>{{item.category}}: {{item.amount}} ({{item.description}})</p>
-              </div>
-            </div>
-            <div class="budget-item total-budget">
-              <div class="budget-icon total-icon">
-                <i class="fas fa-dollar-sign"></i>
-              </div>
-              <div class="budget-details">
-                <p><strong>Total budget: {{getTotalBudget()}}</strong></p>
+                <p>{{item.category}}: {{item.amount}} <span *ngIf="item.description">({{item.description}})</span></p>
               </div>
             </div>
           </div>
@@ -91,7 +83,7 @@
           <div class="timeline" *ngFor="let day of data.itineraryDays; let i = index">
             <div class="timeline-header" @slideIn>
               <div class="day-number">{{i+1}}</div>
-              <h3>{{day.title.replace('Day ' + (i+1) + ':', '')}}</h3>
+              <h3>Day {{day.dayNumber}}</h3>
             </div>
 
             <div class="timeline-content">
@@ -140,9 +132,10 @@
         <div class="photos-section">
           <h2>Destination Photos</h2>
           <div class="photos-grid">
-            <!-- Placeholder images - in a real app, you'd fetch actual destination photos -->
-            <div class="photo-card" *ngFor="let i of [1,2,3,4,5,6]" @slideIn>
-              <img [src]="'https://source.unsplash.com/400x300/?' + encodeURI(data.destinationName) + ',travel,' + i" alt="Destination photo">
+            <!-- Display photos for locations extracted for the map -->
+            <div class="photo-card" *ngFor="let location of mapMarkers; let i = index" @slideIn [style.animation-delay]="(i * 0.1) + 's'">
+              <img [src]="'https://source.unsplash.com/400x300/?' + encodeURI(location.name) + ',travel'" [alt]="'Photo of ' + location.name">
+              <div class="photo-caption">{{location.name}}</div>
             </div>
           </div>
         </div>
@@ -153,6 +146,25 @@
       <div class="tab-content" @fadeIn>
         <div class="share-section">
           <h2>Save & Share Your Trip</h2>
+
+          <!-- Add title input -->
+          <div class="trip-title-input">
+            <label for="tripTitle">Give your trip a title:</label>
+            <input
+              type="text"
+              id="tripTitle"
+              [(ngModel)]="tripTitle"
+              placeholder="e.g., My Summer Adventure in Japan"
+              [disabled]="isSaving"
+            >
+          </div>
+
+          <!-- Add error/success messages -->
+          <div class="save-messages" *ngIf="saveError || saveSuccess">
+            <p class="error-message" *ngIf="saveError">{{saveError}}</p>
+            <p class="success-message" *ngIf="saveSuccess">Trip saved successfully!</p>
+          </div>
+
           <div class="share-options">
             <button class="share-button">
               <i class="fas fa-download"></i>
@@ -166,9 +178,13 @@
               <i class="fas fa-share-alt"></i>
               Share
             </button>
-            <button class="share-button">
-              <i class="fas fa-heart"></i>
-              Save to Favorites
+            <button
+              class="share-button"
+              (click)="saveTrip()"
+              [disabled]="isSaving"
+            >
+              <i class="fas" [ngClass]="{'fa-heart': !isSaving, 'fa-spinner fa-spin': isSaving}"></i>
+              {{isSaving ? 'Saving...' : 'Save to Favorites'}}
             </button>
           </div>
         </div>

@@ -533,3 +533,66 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Add styles for Saved Trips section */
+.saved-trips-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.trip-card {
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+
+  &:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+  }
+
+  mat-card-title {
+    font-size: 1.2em;
+    font-weight: bold;
+    color: #333;
+  }
+
+  mat-card-subtitle {
+    color: #777;
+  }
+
+  mat-card-content {
+    p {
+      margin: 5px 0;
+      color: #555;
+    }
+  }
+}
+
+.loading-spinner,
+.error-message,
+.no-trips-message {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 40px;
+  text-align: center;
+  color: #777;
+
+  mat-icon {
+    font-size: 48px;
+    margin-bottom: 10px;
+  }
+
+  p {
+    font-size: 1.1em;
+  }
+}
+
+.error-message {
+    color: #e74c3c;
+    mat-icon {
+        color: #e74c3c;
+    }
+}

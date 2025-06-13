@@ -1,0 +1,54 @@
+<div class="admin-dashboard-container">
+  <div class="dashboard-header">
+    <h1>Admin Dashboard</h1>
+    <div class="user-info">
+      <span>Welcome, {{ authService.getCurrentUser()?.username }}</span>
+    </div>
+  </div>
+
+  <div class="dashboard-content">
+    <!-- Age Distribution Chart -->
+    <div class="chart-container">
+      <h2>User Age Distribution</h2>
+      <canvas baseChart
+        [data]="ageChartData"
+        [options]="ageChartOptions"
+        [type]="chartType">
+      </canvas>
+    </div>
+
+    <!-- Content Moderation -->
+    <div class="moderation-container">
+      <h2>Content Moderation</h2>
+      <div class="moderation-table" *ngIf="!loading">
+        <table>
+          <thead>
+            <tr>
+              <th>Post ID</th>
+              <th>User</th>
+              <th>Content</th>
+              <th>Status</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let post of posts">
+              <td>{{ post.id }}</td>
+              <td>{{ post.user.username }}</td>
+              <td>{{ post.content }}</td>
+              <td [class.pending]="post.status === 'pending'">{{ post.status }}</td>
+              <td>
+                <button (click)="markAsReviewed(post.id)" [disabled]="post.status !== 'pending'">
+                  Mark as Reviewed
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="loading" *ngIf="loading">
+        <p>Loading data...</p>
+      </div>
+    </div>
+  </div>
+</div>

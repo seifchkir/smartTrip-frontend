@@ -1,18 +1,47 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable, catchError, of, throwError } from 'rxjs';
+import { Observable, catchError, of, throwError, switchMap, tap, map, BehaviorSubject } from 'rxjs';
+import { Router } from '@angular/router';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  // Try different API URL formats
-  private apiUrl = 'http://localhost:8080/api';
-  // Alternative URLs to try if the main one doesn't work
-  private altApiUrl1 = 'http://127.0.0.1:8080/api';
-  private altApiUrl2 = 'http://localhost:8080';
+  private apiUrl = environment.apiUrl;
+  private tokenKey = 'auth_token';
+  private currentUserSubject = new BehaviorSubject<any>(null);
+  public currentUser$ = this.currentUserSubject.asObservable();
 
-  constructor(private http: HttpClient) { }
+  constructor(
+    private http: HttpClient,
+    private router: Router
+  ) {
+    // Initialize currentUser from localStorage if token exists
+    const token = this.getToken();
+    if (token) {
+      this.getCurrentUserProfile().subscribe();
+    }
+  }
+
+  getCurrentUser(): any {
+    // First try to get from BehaviorSubject
+    const currentUser = this.currentUserSubject.value;
+    if (currentUser) {
+      return currentUser;
+    }
+
+    // If not in BehaviorSubject, try localStorage
+    const storedUser = localStorage.getItem('user');
+    if (storedUser) {
+      const user = JSON.parse(storedUser);
+      // Update BehaviorSubject with stored user
+      this.currentUserSubject.next(user);
+      return user;
+    }
+
+    return null;
+  }
 
   // First step: Register user with basic information
   register(userData: any): Observable<any> {
@@ -83,11 +112,15 @@ export class AuthService {
 
   // Store the JWT token
   setToken(token: string): void {
-    localStorage.setItem('auth_token', token);
+    console.log('AuthService: Setting token in localStorage:', token);
+    localStorage.setItem(this.tokenKey, token);
   }
 
   getToken(): string | null {
-    return localStorage.getItem('auth_token');
+    console.log('AuthService: Retrieving token from localStorage...');
+    const token = localStorage.getItem(this.tokenKey);
+    console.log('AuthService: Retrieved token:', token);
+    return token;
   }
 
   // Inside your AuthService class
@@ -98,10 +131,10 @@ export class AuthService {
   }
 
   logout(): void {
-    localStorage.removeItem('auth_token');
+    localStorage.removeItem(this.tokenKey);
+    this.currentUserSubject.next(null);
+    this.router.navigate(['/login']);
   }
-
-  // Add this method to your auth service
 
   getUserByEmail(email: string): Observable<any> {
     const headers = new HttpHeaders({
@@ -114,24 +147,10 @@ export class AuthService {
       .pipe(
         catchError(error => {
           console.error('Error fetching user by email:', error);
-
-          if (error.status === 0) {
-            console.log('Trying alternative URL:', this.altApiUrl1);
-            return this.http.get(`${this.altApiUrl1}/users/by-email?email=${email}`, { headers })
-              .pipe(
-                catchError(error2 => {
-                  console.error('Second attempt failed:', error2);
-                  return throwError(() => new Error('Cannot connect to server. Please check if the backend is running.'));
-                })
-              );
-          }
-
-          return throwError(() => error);
+          return throwError(() => new Error('Cannot connect to server. Please check if the backend is running.'));
         })
       );
   }
-
-  // Add this method to your AuthService
 
   getUserProfilePhoto(email: string): Observable<any> {
     return this.http.get(`${this.apiUrl}/users/photo?email=${email}`).pipe(
@@ -142,38 +161,27 @@ export class AuthService {
     );
   }
 
-  // Add this method to get the current user's profile
   getCurrentUserProfile(): Observable<any> {
     const token = this.getToken();
     if (!token) {
-      return throwError(() => new Error('No authentication token found'));
+      return new Observable(subscriber => {
+        subscriber.next(null);
+        subscriber.complete();
+      });
     }
 
-    const headers = new HttpHeaders({
-      'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      'Authorization': `Bearer ${token}`
-    });
-
-    return this.http.get(`${this.apiUrl}/auth/me`, { headers })
-      .pipe(
-        catchError(error => {
-          console.error('Error fetching current user profile:', error);
-
-          if (error.status === 401) {
-            // Token is invalid or expired
-            this.logout(); // Clear the invalid token
-            return throwError(() => new Error('Your session has expired. Please login again.'));
-          }
-
-          return throwError(() => error);
-        })
-      );
+    console.log('AuthService: Fetching user profile with headers:', `Bearer ${token}`);
+    return this.http.get(`${this.apiUrl}/auth/me`, {
+      headers: {
+        'Authorization': `Bearer ${token}`
+      }
+    }).pipe(
+      tap(user => {
+        console.log('Fetched user profile after login:', user);
+        this.currentUserSubject.next(user);
+      })
+    );
   }
-
-  // Add a login method to connect with the authenticate endpoint
-  // Add or update the login method in your AuthService
-  // In the login method of your auth.service.ts
 
   login(credentials: { email: string; password: string }): Observable<any> {
     const headers = new HttpHeaders({
@@ -194,6 +202,23 @@ export class AuthService {
       headers
     })
     .pipe(
+      // After successful authentication (getting the token),
+      // fetch the user profile and update currentUser
+      switchMap((response: any) => {
+        console.log('AuthService: Full login response from backend:', response);
+        console.log('Login successful, got token. Fetching user profile...');
+        this.setToken(response.token); // Use the correct property name from the backend response
+        return this.getCurrentUserProfile().pipe(
+          tap(userProfile => {
+            console.log('AuthService: User profile role after login:', userProfile?.role);
+            console.log('Fetched user profile after login:', userProfile);
+            this.currentUserSubject.next(userProfile);
+            // Optionally save user profile to local storage here
+            localStorage.setItem('user', JSON.stringify(userProfile));
+          }),
+          map(() => response) // Return the original login response
+        );
+      }),
       catchError(error => {
         console.error('Login request error details:', error);
 
@@ -210,7 +235,6 @@ export class AuthService {
     );
   }
 
-  // Add a method to request account unlock or password reset
   requestPasswordReset(email: string): Observable<any> {
     const headers = new HttpHeaders({
       'Content-Type': 'application/json',

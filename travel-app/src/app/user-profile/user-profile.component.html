@@ -61,7 +61,7 @@
           <span class="stat-label">Photos</span>
         </div>
         <div class="stat">
-          <span class="stat-value">{{ trips.length }}</span>
+          <span class="stat-value">{{ savedTrips.length }}</span>
           <span class="stat-label">Trips</span>
         </div>
         <div class="stat">
@@ -75,18 +75,12 @@
       </div>
     </div>
 
-    <!-- Profile tabs -->
-    <div class="profile-tabs">
-      <div class="tab" [class.active]="activeTab === 'posts'" (click)="setActiveTab('posts')">Posts</div>
-      <div class="tab" [class.active]="activeTab === 'photos'" (click)="setActiveTab('photos')">Photos</div>
-      <div class="tab" [class.active]="activeTab === 'trips'" (click)="setActiveTab('trips')">Trips</div>
-      <div class="tab" [class.active]="activeTab === 'about'" (click)="setActiveTab('about')">About</div>
-    </div>
-
-    <!-- Tab content -->
+    <!-- Tabs Navigation -->
+    <mat-tab-group animationDuration="300ms" [(selectedIndex)]="activeTab" (selectedTabChange)="setActiveTab($event)" class="profile-tabs">
+      <mat-tab label="Posts">
+        <!-- Posts tab -->
     <div class="tab-content">
-      <!-- Posts tab -->
-      <div *ngIf="activeTab === 'posts'" class="posts-container">
+          <div class="posts-container">
         <div *ngIf="posts.length === 0" class="no-posts-message">
           <p>No posts yet. Share your travel experiences!</p>
         </div>
@@ -117,23 +111,61 @@
           </div>
         </div>
       </div>
+        </div>
+      </mat-tab>
 
-      <!-- Photos tab -->
-      <div *ngIf="activeTab === 'photos'" class="photos-container">
-        <!-- This section might contain placeholder images -->
-        <!-- You need to check and update any img tags here -->
+      <!-- Trips Tab Content -->
+      <mat-tab label="Trips">
+        <div class="tab-content">
+          <h2>Saved Trips</h2>
+
+          <!-- Loading Indicator -->
+          <div *ngIf="isLoadingTrips" class="loading-spinner">
+            <mat-spinner></mat-spinner>
+            <p>Loading your saved trips...</p>
+          </div>
+
+          <!-- Error Message -->
+          <div *ngIf="tripsError" class="error-message">
+            <mat-icon color="warn">error_outline</mat-icon>
+            <p>{{ tripsError }}</p>
       </div>
 
-      <!-- Trips tab -->
-      <div *ngIf="activeTab === 'trips'" class="trips-container">
-        <!-- This section might contain placeholder images -->
-        <!-- You need to check and update any img tags here -->
+          <!-- No Trips Message -->
+          <div *ngIf="!isLoadingTrips && !tripsError && savedTrips.length === 0" class="no-trips-message">
+            <mat-icon>info_outline</mat-icon>
+            <p>You haven't saved any trips yet.</p>
       </div>
 
-      <!-- About tab -->
-      <div *ngIf="activeTab === 'about'" class="about-container">
-        <!-- This section might contain placeholder images -->
-        <!-- You need to check and update any img tags here -->
+          <!-- Saved Trips List -->
+          <div *ngIf="!isLoadingTrips && !tripsError && savedTrips.length > 0" class="saved-trips-list">
+            <mat-card *ngFor="let trip of savedTrips" class="trip-card" (click)="viewTripDetails(trip)">
+              <mat-card-header>
+                <mat-card-title>{{ trip.title || 'Untitled Trip' }}</mat-card-title>
+                <mat-card-subtitle>{{ trip.destination || 'Unknown Destination' }}</mat-card-subtitle>
+              </mat-card-header>
+              <mat-card-content>
+                <p><strong>Created:</strong> {{ formatDate(trip.createdAt) }}</p>
+                <p *ngIf="trip.duration"><strong>Duration:</strong> {{ trip.duration }} days</p>
+                <!-- Display other relevant trip details as needed -->
+              </mat-card-content>
+            </mat-card>
       </div>
     </div>
+      </mat-tab>
+
+      <!-- Photos Tab Content -->
+      <mat-tab label="Photos">
+        <div class="tab-content">
+          <!-- Existing Photos tab content -->
+        </div>
+      </mat-tab>
+
+      <!-- About Tab Content -->
+      <mat-tab label="About">
+        <div class="tab-content">
+          <!-- Existing About tab content -->
+        </div>
+      </mat-tab>
+    </mat-tab-group>
   </div>

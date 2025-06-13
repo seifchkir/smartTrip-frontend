@@ -5,8 +5,10 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatTabsModule } from '@angular/material/tabs';
 import { trigger, transition, style, animate } from '@angular/animations';
-import { HttpClientModule } from '@angular/common/http';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpClientModule } from '@angular/common/http';
+import { FormsModule } from '@angular/forms';
+import { tripService } from './trip.service'; // Import the tripService instance
+
 // First, let's add an interface for the badge structure
 interface Badge {
   icon: string;
@@ -33,7 +35,8 @@ interface BudgetItem {
     MatButtonModule,
     MatIconModule,
     MatTabsModule,
-    HttpClientModule
+    HttpClientModule,
+    FormsModule
   ],
   animations: [
     trigger('fadeIn', [
@@ -58,6 +61,12 @@ export class TripDetailsDialogComponent implements OnInit {
   mapInitialized = false;
   mapMarkers: any[] = [];
 
+  // Add new properties
+  tripTitle: string = '';
+  isSaving: boolean = false;
+  saveError: string | null = null;
+  saveSuccess: boolean = false;
+
   constructor(
     public dialogRef: MatDialogRef<TripDetailsDialogComponent>,
     @Inject(MAT_DIALOG_DATA) public data: any,
@@ -65,21 +74,25 @@ export class TripDetailsDialogComponent implements OnInit {
   ) {}
 
   ngOnInit() {
-    // Set the overview text once during initialization
-    console.log('Raw recommendation:', this.data.rawRecommendationString);
+    // When data comes from a SavedTrip, rawRecommendationString might be the full markdown.
+    // When data comes from new generation, tripOverviewText is generated here.
+    // Let's ensure tripOverviewText is set, prioritizing a passed-in title or generated overview.
+    this.tripOverviewText = this.data.title || this.getTripOverview();
 
-    // Use the raw recommendation string directly if available
-    this.tripOverviewText = this.data.rawRecommendationString ||
-                           this.data.extracted_info?.recommendation ||
-                           this.data.recommendation ||
-                           this.getTripOverview();
+    console.log('Dialog data on init:', this.data);
 
-    // Extract locations from itinerary for map markers
-    this.extractLocationsFromItinerary();
+    console.log('Detailed Budget data:', this.data?.detailedBudget);
+    console.log('Budget Breakdown array:', this.getBudgetBreakdown());
+
+    // Location extraction will be called when the map tab is initialized.
+
+    // Initialize map if the map tab is initially active (less common) or when map tab is selected.
+    // The initMap call is already in onTabChange.
   }
 
   // Extract locations from the itinerary with improved filtering
   extractLocationsFromItinerary() {
+    console.log('extractLocationsFromItinerary: Called');
     if (!this.data?.itineraryDays) return;
 
     const locations: {name: string, day: number, description: string}[] = [];
@@ -99,76 +112,62 @@ export class TripDetailsDialogComponent implements OnInit {
 
       // Look for location mentions in each step
       day.steps.forEach((step: string) => {
-        // Extract location names using more sophisticated patterns
-        const locationPatterns = [
-          // Pattern for common phrases like "to [Location]", "at [Location]", "in [Location]" followed by capitalized words
-          /(?:(?:to|at|in|near|through|visit|explore|go to|arrive at|travel to|head to|drive to|see|spot|hike through)\s+)(?:the\s+)?([A-Z][a-zA-Z\s-]+?(?:\s(?:International Airport|National Park|Waterfall|Refuge|Village|Cultural Center|Falls|Beach|Museum|Castle|Palace|Cathedral|Temple|Mountain|Island|Lake|City|Town|Area|Reserve|Port|Station|Harbor|Bay|Coast|River|Lake|Forest|Jungle|Desert|Valley|Peak|Point|Bridge|Square|Street|Road|Route|Highway|Trail|Path|Ruins|Site|Center|Gardens|Market|Shop|Store|Restaurant|Cafe|Bar|Club|Hotel|Resort|Lodge|Villa|Apartment|House|Building|Tower|Bridge|Tunnel|Dam))?)(?:\.|\,|\s|$)/g,
-          // Pattern for capitalized sequences that are likely place names (e.g., proper nouns)
-          /\b([A-Z][a-zA-Z\s-]+?(?:\s[A-Z][a-zA-Z\s]*)*)\b(?=.*(?:International Airport|National Park|Waterfall|Refuge|Village|Cultural Center|Falls|Beach|Museum|Castle|Palace|Cathedral|Temple|Mountain|Island|Lake|City|Town|Area|Reserve|Port|Station|Harbor|Bay|Coast|River|Lake|Forest|Jungle|Desert|Valley|Peak|Point|Bridge|Square|Street|Road|Route|Highway|Trail|Path|Ruins|Site|Center|Gardens|Market|Shop|Store|Restaurant|Cafe|Bar|Club|Hotel|Resort|Lodge|Villa|Apartment|House|Building|Tower|Bridge|Tunnel|Dam))?/g
-        ];
+        // First check for explicit location markers
+        if (step.includes('📍 Location(s):')) {
+          const locationPart = step.split('📍 Location(s):')[1].trim();
+          const locationNames = locationPart.split(',').map(loc => loc.trim());
 
-        const stepLocations: string[] = [];
-
-        for (const pattern of locationPatterns) {
-          let match;
-          while ((match = pattern.exec(step)) !== null) {
-            const locationName = match[1].trim();
-
-            // Enhanced filtering of non-locations and generic terms
-            const nonLocations = [
-              'morning', 'afternoon', 'evening', 'breakfast', 'lunch', 'dinner',
-              'hotel', 'day', 'time', 'hour', 'minute', 'second', 'today', 'tomorrow',
-              'night', 'early', 'late', 'first', 'last', 'next', 'previous',
-              'the surrounding landscape', 'the surrounding rainforest', 'local and international cuisine',
-              'crystal-clear waters', 'a picturesque setting', 'exotic species', 'a protected area',
-              'memories of your peaceful and immersive experience', 'the best rates', 'specific travel preferences and choices',
-              'arrive', 'check-in', 'enjoy', 'take', 'visit', 'return', 'check-out', 'depart', 'budget', 'food', 'please', 'additionally', 'i recommend',
-              'flights', 'accommodation', 'activities', 'miscellaneous', 'total'
-            ];
-
-            // Skip if it contains common non-location words or phrases (case-insensitive)
-            if (nonLocations.some(word => locationName.toLowerCase().includes(word.toLowerCase()))) {
-              continue;
+          locationNames.forEach(locationName => {
+            if (locationName && !locations.some(loc => loc.name.toLowerCase() === locationName.toLowerCase())) {
+              locations.push({
+                name: locationName,
+                day: dayIndex + 1,
+                description: `Day ${dayIndex + 1}: ${day.title}`
+              });
             }
-
-            // Skip if it's too short or consists of only one word unless it's a known single-word location (e.g., Paris, Rome)
-            const knownSingleWordLocations = ['Paris', 'Rome', 'Bali', 'Tokyo', 'London']; // Add more as needed
-            if (locationName.length < 4 || (locationName.split(' ').length === 1 && !knownSingleWordLocations.includes(locationName))) {
-              continue;
-            }
-
-            // Skip if it ends with common non-location words
-            const endingNonLocations = ['activities', 'cuisine', 'landscape', 'wildlife', 'experience', 'rates', 'choices'];
-            if (endingNonLocations.some(word => locationName.toLowerCase().endsWith(word))) {
-              continue;
-            }
-
-            // Avoid adding duplicates within the same step
-            if (!stepLocations.some(loc => loc.toLowerCase() === locationName.toLowerCase())) {
-              stepLocations.push(locationName);
-            }
-          }
+          });
         }
 
-        // Add unique locations from this step to the main locations array
-        stepLocations.forEach(locationName => {
-          // Avoid duplicates across all days
+        // Then look for location mentions in activities
+        if (step.includes('🗓️ Activities:')) {
+          const activityLines = step.split('\n')
+            .filter(line => line.trim().startsWith('-'))
+            .map(line => line.trim().substring(1).trim());
+
+          activityLines.forEach(activity => {
+            // Look for common location indicators
+            const locationIndicators = [
+              'at', 'in', 'to', 'visit', 'explore', 'see', 'tour',
+              'along', 'through', 'near', 'around'
+            ];
+
+            locationIndicators.forEach(indicator => {
+              const regex = new RegExp(`${indicator}\\s+([A-Z][a-zA-Z\\s-]+?)(?:,|\\.|$)`, 'g');
+              let match;
+              while ((match = regex.exec(activity)) !== null) {
+                const locationName = match[1].trim();
+                // Skip if it's too short or contains common non-location words
+                if (locationName.length < 3 ||
+                    /morning|afternoon|evening|breakfast|lunch|dinner|hotel|day|time/i.test(locationName)) {
+              continue;
+            }
+
           if (!locations.some(loc => loc.name.toLowerCase() === locationName.toLowerCase())) {
             locations.push({
               name: locationName,
               day: dayIndex + 1,
-              description: step // Use the whole step as description for now
+                    description: activity
             });
           }
+              }
+            });
         });
-
+        }
       });
     });
 
-    console.log('Extracted locations BEFORE slicing:', locations);
-
-    // Limit to a reasonable number of locations (main destination + up to 10 more)
-    this.mapMarkers = locations.slice(0, 11);
+    console.log('Extracted locations:', locations);
+    this.mapMarkers = locations;
   }
 
   // Improved geocoding with better context and region biasing
@@ -322,34 +321,15 @@ export class TripDetailsDialogComponent implements OnInit {
     return null;
   }
 
+  // Modify getTripOverview to be a fallback or to display a simple intro based on available data
   getTripOverview(): string {
-    if (!this.data) return '';
-
-    const destination = this.data.destinationName || 'your destination';
-    const days = this.data.itineraryDays?.length || 0;
-
-    // Extract trip theme from badges if available
-    let tripTheme = '';
-    if (this.data.badges && this.data.badges.length > 0) {
-      const themeLabel = this.data.badges.find((b: Badge) => b.icon === 'fa-leaf')?.label;
-      if (themeLabel) {
-        tripTheme = ` focusing on ${themeLabel.toLowerCase()}`;
-      }
+    if (this.data?.rawRecommendationString) {
+      // If raw markdown is available, use the beginning of it as an overview or indicate it's detailed.
+      return this.data.rawRecommendationString.substring(0, 200) + '...'; // Display snippet
+    } else if (this.data?.title) {
+        return `Details for your trip to ${this.data.destinationName || this.data.title}.`;
     }
-
-    // Extract budget from badges if available
-    let budget = '';
-    if (this.data.badges && this.data.badges.length > 0) {
-      const budgetLabel = this.data.badges.find((b: Badge) => b.icon === 'fa-dollar-sign')?.label;
-      if (budgetLabel) {
-        budget = ` with a budget of ${budgetLabel}`;
-      }
-    }
-
-    // Create a dynamic introduction based on destination
-    const intro = `Based on your preferences, I recommend a ${days}-day trip to ${destination}. ${destination} offers ${this.getDestinationFeatures(destination)} and a range of ${this.getTripActivities()} activities.`;
-
-    return intro + `\n\nExplore the beautiful ${destination} with this personalized itinerary${tripTheme}${budget}. Your trip includes ${days} days of carefully planned activities.`;
+    return 'Detailed trip information.';
   }
 
   // Helper method to generate destination features
@@ -424,7 +404,13 @@ export class TripDetailsDialogComponent implements OnInit {
     return budgetBadge?.label || '$1000'; // Default fallback
   }
 
+  // Modify getHighlights to use the highlights array from the data
   getHighlights(): string[] {
+    // Directly use the highlights array passed in the data
+    if (this.data?.highlights && Array.isArray(this.data.highlights)) {
+        return this.data.highlights;
+    }
+     // Fallback to the old logic if highlights array is not available (e.g., from new generation)
     if (!this.data?.itineraryDays) return [];
 
     // Extract key highlights from the first step of each day
@@ -432,17 +418,45 @@ export class TripDetailsDialogComponent implements OnInit {
     return this.data.itineraryDays
       .slice(0, 5)
       .map((day: any, index: number) => {
-        const step = day.steps[0] || '';
+        // Check if day.steps exists and has at least one element
+        const step = (day.steps && day.steps.length > 0) ? day.steps[0] : '';
         // Clean up the step text
         return step.replace(/^\s*\*?\s*(Morning|Afternoon|Evening):\s*/i, '')
                   .split('.')[0] + '.';
       });
   }
 
+  // Modify getBudgetBreakdown to use the detailedBudget object from the data
   getBudgetBreakdown(): BudgetItem[] {
-    // This would ideally come from the trip data
-    // For now, we'll create a sample breakdown based on the total budget
-    const totalBudget = this.getTotalBudget();
+    // Use the detailedBudget object passed in the data
+    if (this.data?.detailedBudget) {
+        const breakdown: BudgetItem[] = [];
+        // Map the detailedBudget object to the BudgetItem array format expected by the template
+        for (const category in this.data.detailedBudget) {
+            if (this.data.detailedBudget.hasOwnProperty(category)) {
+                breakdown.push({
+                    category: category,
+                    amount: '$' + this.data.detailedBudget[category],
+                    description: '', // Description might not be available in saved data
+                    icon: this.getBudgetIcon(category), // Helper to get icon based on category
+                    class: this.getBudgetIconClass(category) // Helper to get class based on category
+                });
+            }
+        }
+         // Add a total if it exists in the detailedBudget
+        if (this.data.detailedBudget.hasOwnProperty('Total')) {
+             // Find the total item and move it to the end or style it differently
+             const totalItemIndex = breakdown.findIndex(item => item.category === 'Total');
+             if (totalItemIndex > -1) {
+                 const [totalItem] = breakdown.splice(totalItemIndex, 1);
+                 breakdown.push({...totalItem, class: 'total-icon'}); // Add total class for styling
+             }
+        }
+        return breakdown;
+    }
+
+    // Fallback to the old logic if detailedBudget is not available
+    const totalBudget = this.getTotalBudget(); // This will use the budget badge if available
     const numericBudget = parseInt(totalBudget.replace(/[^0-9]/g, '')) || 1000;
 
     return [
@@ -453,6 +467,7 @@ export class TripDetailsDialogComponent implements OnInit {
         icon: 'fa-car',
         class: 'transportation-icon'
       },
+      // ... rest of old hardcoded budget items ...
       {
         category: 'Accommodation',
         amount: '$' + Math.round(numericBudget * 0.4),
@@ -480,8 +495,45 @@ export class TripDetailsDialogComponent implements OnInit {
         description: 'souvenirs and incidentals',
         icon: 'fa-shopping-bag',
         class: 'misc-icon'
+      },
+      { // Add a calculated total for the fallback
+        category: 'Total',
+        amount: totalBudget,
+        description: 'Estimated total budget',
+        icon: 'fa-dollar-sign',
+        class: 'total-icon'
       }
     ];
+  }
+
+  // Helper to get budget icon based on category name (for saved data)
+  private getBudgetIcon(category: string): string {
+      const cleanedCategory = category.replace(/^[-\s*]+|:\s*$/g, '').trim(); // Remove leading -, *, spaces, and trailing :
+      switch (cleanedCategory) {
+          case 'Transportation': return 'fa-car';
+          case 'Accommodation': return 'fa-bed';
+          case 'Food and supplies': return 'fa-utensils';
+          case 'Activities': return 'fa-hiking';
+          case 'Miscellaneous': return 'fa-shopping-bag';
+          case 'Total': return 'fa-dollar-sign';
+          case 'Permits and fees': return 'fa-scroll'; // Added icon for Permits and fees
+          default: return '';
+      }
+  }
+
+    // Helper to get budget icon class based on category name (for saved data)
+  private getBudgetIconClass(category: string): string {
+      const cleanedCategory = category.replace(/^[-\s*]+|:\s*$/g, '').trim(); // Remove leading -, *, spaces, and trailing :
+      switch (cleanedCategory) {
+          case 'Transportation': return 'transportation-icon';
+          case 'Accommodation': return 'accommodation-icon';
+          case 'Food and supplies': return 'food-icon';
+          case 'Activities': return 'activities-icon';
+          case 'Miscellaneous': return 'misc-icon';
+          case 'Total': return 'total-icon';
+          case 'Permits and fees': return 'permits-icon'; // Added class for Permits and fees
+          default: return '';
+      }
   }
 
   getPersonalizationHint(): string {
@@ -503,6 +555,14 @@ export class TripDetailsDialogComponent implements OnInit {
     return this.getTripOverview();
   }
 
+  getOverviewParagraph(): string {
+    if (!this.data?.rawRecommendationString) {
+      return this.getTripOverview();
+    }
+    const paragraphs = this.data.rawRecommendationString.split('\n\n');
+    return paragraphs[0] || this.getTripOverview(); // Return the first paragraph or fallback
+  }
+
   // Method to close the dialog
   closeDialog(): void {
     this.dialogRef.close();
@@ -518,6 +578,10 @@ export class TripDetailsDialogComponent implements OnInit {
 
   // Method to determine the CSS class for each itinerary step
   getStepClass(step: string): string {
+    // Add a check if step is a string before processing
+    if (typeof step !== 'string' || !step) {
+        return ''; // Return empty string if step is not a valid string
+    }
     const step_lower = step.toLowerCase();
 
     if (step_lower.includes('morning') || step_lower.includes('breakfast')) {
@@ -579,6 +643,9 @@ export class TripDetailsDialogComponent implements OnInit {
         this.mapInitialized = true;
 
         // Add markers for locations
+        console.log('initMap (promise): Calling extractLocationsFromItinerary...');
+        this.extractLocationsFromItinerary();
+        console.log('initMap (promise): After extractLocationsFromItinerary, mapMarkers:', this.mapMarkers);
         this.addMarkersToMap(L);
 
         // Force a resize to ensure the map renders correctly
@@ -591,6 +658,8 @@ export class TripDetailsDialogComponent implements OnInit {
 
   // Add markers to the map with improved styling
   async addMarkersToMap(L: any) {
+    console.log('addMarkersToMap: Called at start, current mapMarkers:', this.mapMarkers);
+
     console.log('Adding markers to map, markers:', this.mapMarkers);
 
     // Create custom icon for better visibility
@@ -672,5 +741,58 @@ export class TripDetailsDialogComponent implements OnInit {
   // Add this method for encoding URIs in the template
   encodeURI(text: string): string {
     return encodeURIComponent(text);
+  }
+
+  // Method to handle saving using the service
+  async saveTrip() {
+    // Clear previous messages
+    this.saveError = null;
+    this.saveSuccess = false;
+
+    // Validate title on the frontend before calling the service (service also validates)
+    if (!this.tripTitle || !this.tripTitle.trim()) {
+      this.saveError = 'Please enter a title for your trip';
+      return;
+    }
+
+    this.isSaving = true;
+
+    // Use the raw recommendation string from data for saving
+    const markdownRecForSave = this.data.rawRecommendationString;
+
+    if (!markdownRecForSave) {
+        console.error('saveTrip: rawRecommendationString is missing from dialog data.', this.data);
+         this.saveError = 'Cannot save trip: Recommendation data is missing.';
+         this.isSaving = false;
+         return;
+    }
+
+    const originalQ = this.data.originalQuery; // Assuming this is correctly populated
+    const title = this.tripTitle;
+
+    console.log('Data being sent to TripService.saveTrip:', {
+      markdownRecommendation: markdownRecForSave,
+      originalQuery: originalQ,
+      title: title
+    });
+
+    try {
+      // Call the saveTrip method from the imported tripService instance
+      const response = await tripService.saveTrip(
+        markdownRecForSave, // Use the dedicated variable
+        originalQ, // originalQuery
+        title // title
+      );
+
+      this.saveSuccess = true;
+      console.log('Trip saved successfully:', response);
+      // Optionally, display the saved_trip_id or other response data
+    } catch (error: any) {
+      console.error('Error saving trip:', error);
+      // The service throws errors with user-friendly messages
+      this.saveError = error.message || 'Failed to save trip. Please try again.';
+    } finally {
+      this.isSaving = false;
+    }
   }
 }

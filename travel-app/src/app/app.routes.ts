@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { AuthGuard } from './guards/auth.guard';
+import { AdminGuard } from './guards/admin.guard';
 import { TestComponent } from './test/test.component';
 import { UserProfileComponent } from './user-profile/user-profile.component';
 
@@ -13,8 +14,6 @@ export const routes: Routes = [
     loadComponent: () => import('./home/home.component').then(m => m.HomeComponent),
     canActivate: [AuthGuard]
   },
-  // Use direct component reference instead of lazy loading
-  
   {
     path: 'profile',
     component: UserProfileComponent
@@ -29,10 +28,15 @@ export const routes: Routes = [
     loadComponent: () => import('./trending/trending.component').then(m => m.TrendingComponent),
     canActivate: [AuthGuard]
   },
+
   {
     path: 'test',
     component: TestComponent
   },
-  // Add other protected routes here
+  {
+    path: 'admin',
+    loadChildren: () => import('./admin/admin.module').then(m => m.AdminModule),
+    canActivate: [AuthGuard, AdminGuard]
+  },
   { path: '**', redirectTo: '/home' }
 ];

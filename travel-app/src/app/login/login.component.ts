@@ -52,31 +52,14 @@ export class LoginComponent implements OnInit {
       next: (response) => {
         console.log('Login successful:', response);
 
-        // Store the auth token
-        if (response && response.token) {
-          this.authService.setToken(response.token);
+        // The authService.login now handles fetching and setting the user profile
+        // and token internally via switchMap. The 'response' here is the final result
+        // from the authentication request (often just the token object).
+        // The user profile is already updated in the AuthService and localStorage.
 
-          // Fetch user profile using the token
-          this.authService.getCurrentUserProfile().subscribe({
-            next: (userProfile) => {
-              console.log('User profile loaded:', userProfile);
-
-              // Store user profile in localStorage for easy access
-              localStorage.setItem('userProfile', JSON.stringify(userProfile));
-
-              // Navigate to home page after successful login
-              this.router.navigate(['/home']);
-            },
-            error: (profileError) => {
-              console.error('Error loading user profile:', profileError);
-              // Still navigate to home even if profile loading fails
-              this.router.navigate(['/home']);
-            }
-          });
-        } else {
-          // If no token in response, just navigate to home
-          this.router.navigate(['/home']);
-        }
+        // Navigate to home page after the entire login process is successful
+        console.log('Login process completed, navigating to home.');
+        this.router.navigate(['/home']);
       },
       error: (error) => {
         console.error('Login error:', error);

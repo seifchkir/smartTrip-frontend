@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { RouterModule } from '@angular/router';
 import { NavbarComponent } from '../navbar/navbar.component';
@@ -7,6 +7,18 @@ import { HttpClient, HttpClientModule } from '@angular/common/http';
 import { environment } from '../../environments/environment';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TripDetailsDialogComponent } from '../trip-details-dialog/trip-details-dialog.component';
+import { TripParsingService, ParsedTripPlan } from '../trip-details-dialog/trip-parsing.service';
+import { MatButtonModule } from '@angular/material/button';
+import { MatIconModule } from '@angular/material/icon';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { ChatbotService } from '../shared/services/chatbot.service';
+import { ChatbotModule } from '../shared/components/chatbot/chatbot.module';
+
+interface Badge {
+  icon: string;
+  label: string;
+  color?: string;
+}
 
 @Component({
   selector: 'app-home',
@@ -17,12 +29,16 @@ import { TripDetailsDialogComponent } from '../trip-details-dialog/trip-details-
     NavbarComponent,
     FormsModule,
     HttpClientModule,
-    MatDialogModule, // Add this import
+    MatDialogModule,
+    MatButtonModule,
+    MatIconModule,
+    MatProgressSpinnerModule,
+    ChatbotModule
   ],
   templateUrl: './home.component.html',
   styleUrls: ['./home.component.scss']
 })
-export class HomeComponent {
+export class HomeComponent implements OnInit {
   destinations = [
     {
       name: 'Bali, Indonesia',
@@ -73,17 +89,25 @@ export class HomeComponent {
 
   // New properties for trip planning
   tripQuery: string = '';
-  tripPlan: any = null;
+  parsedTripPlan: ParsedTripPlan | null = null;
   isLoading: boolean = false;
   error: string | null = null;
-
-  // New UI properties
-  itineraryDays: any[] = [];
-  destinationName: string = '';
-  badges: { label: string, icon: string, color: string }[] = [];
+  tripPlan: ParsedTripPlan | null = null;
+  badges: Badge[] = [];
   destinationImage: string = '';
+  destinationName: string = '';
+  itineraryDays: any[] = [];
 
-  constructor(private http: HttpClient, private dialog: MatDialog) {}
+  constructor(
+    private http: HttpClient,
+    private dialog: MatDialog,
+    private tripParsingService: TripParsingService,
+    private chatbotService: ChatbotService
+  ) {}
+
+  ngOnInit() {
+    // Initialize any required data
+  }
 
   // Method to analyze trip query
   async analyzeTripQuery() {
@@ -95,248 +119,138 @@ export class HomeComponent {
     this.isLoading = true;
     this.error = null;
     this.tripPlan = null;
-    this.itineraryDays = [];
-    this.destinationName = '';
-    this.badges = [];
-    this.destinationImage = '';
 
     try {
-      const response = await this.http.post('http://localhost:8000/api/analyze-trip', {
-        query: this.tripQuery
-      }).toPromise();
+      const response = await fetch('http://localhost:8000/api/analyze-trip', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ query: this.tripQuery }),
+      });
 
-      console.log('Trip plan response:', response);
-
-      if (response) {
-        this.tripPlan = response;
-        this.parseTripPlan();
-
-        // Open the dialog after parsing the trip plan
-        this.openTripDetailsDialog();
-      } else {
-        this.error = 'Received empty response from server';
+      if (!response.ok) {
+        throw new Error('Failed to analyze trip query');
       }
 
-      this.isLoading = false;
-    } catch (error) {
-      console.error('Error analyzing trip:', error);
-      this.error = 'Failed to analyze trip. Please try again.';
+      const data = await response.json();
+
+      // Parse the raw recommendation using the TripParsingService
+      const parsedData = this.tripParsingService.parseRawRecommendation(
+        data.recommendation,
+        this.tripQuery,
+        data.title || 'My Trip'
+      );
+
+      // Update component properties with parsed data
+      this.tripPlan = parsedData;
+      this.destinationName = parsedData.destinationName || '';
+      this.itineraryDays = parsedData.itineraryDays || [];
+
+      // Generate badges based on the parsed data
+      this.generateBadges(parsedData);
+
+      // Open the trip details dialog with the parsed data
+      this.openTripDetailsDialog(parsedData);
+
+    } catch (error: any) {
+      console.error('Error analyzing trip query:', error);
+      this.error = error.message || 'An error occurred while analyzing your trip query';
+    } finally {
       this.isLoading = false;
     }
   }
 
-  parseTripPlan() {
-    if (!this.tripPlan) return;
-    // Extract destination name from recommendation or extracted_info
-    if (this.tripPlan.extracted_info && this.tripPlan.extracted_info.location) {
-      this.destinationName = this.capitalize(this.tripPlan.extracted_info.location);
-    } else {
-      this.destinationName = 'Your Destination';
-    }
-    // Get a static Unsplash image for the destination
-    this.destinationImage = this.getDestinationImage(this.destinationName);
-    // Prepare badges
-    const info = this.tripPlan.extracted_info || {};
+  private generateBadges(parsedData: ParsedTripPlan) {
     this.badges = [];
-    if (info.duration) this.badges.push({ label: info.duration, icon: 'fa-clock', color: '#4dabf7' });
-    if (info.budget) this.badges.push({ label: info.budget, icon: 'fa-dollar-sign', color: '#43a047' });
-    if (info.theme) this.badges.push({ label: this.capitalize(info.theme), icon: 'fa-leaf', color: '#e91e63' });
-    if (info.location) this.badges.push({ label: this.capitalize(info.location), icon: 'fa-map-marker-alt', color: '#ff9800' });
-    if (info.additional_preferences) this.badges.push({ label: this.capitalize(info.additional_preferences), icon: 'fa-star', color: '#ffb300' });
-    // Parse itinerary from recommendation (if present)
-    this.itineraryDays = this.parseItinerary(this.tripPlan.recommendation || '');
-  }
 
-  parseItinerary(recommendation: string) {
-    console.log('Raw Recommendation String:', recommendation);
-    const days: any[] = [];
-
-    // Check if we have a structured response or plain text
-    if (typeof recommendation !== 'string') {
-      console.log('Non-string recommendation received:', recommendation);
-      return days;
-    }
-
-    // Try to find day patterns in the text
-    const dayPatterns = [
-      /\*\*Day (\d+)[:\s]+(.*?)\*\*/gi,  // **Day X: Title**
-      /Day (\d+)[:\s]+(.*?)(?:\n|$)/gi,  // Day X: Title
-      /\*Day (\d+)[:\s]+(.*?)\*/gi,      // *Day X: Title*
-      /\\n\\nDay (\d+)[:\s]+(.*?)\\n/gi  // \n\nDay X: Title\n
-    ];
-
-    let foundDays = false;
-
-    // Try each pattern until we find matches
-    for (const pattern of dayPatterns) {
-      const matches = [...recommendation.matchAll(pattern)];
-      if (matches.length > 0) {
-        foundDays = true;
-
-        // Extract day positions to split content
-        const dayPositions = matches.map(match => ({
-          dayNum: parseInt(match[1]),
-          title: match[0],
-          index: match.index
-        }));
-
-        // Add end position
-        dayPositions.push({
-          dayNum: 999,
-          title: 'END',
-          index: recommendation.length
-        });
-
-        // Extract content between day markers
-        for (let i = 0; i < dayPositions.length - 1; i++) {
-          const current = dayPositions[i];
-          const next = dayPositions[i + 1];
-
-          const startIdx = current.index + current.title.length;
-          const endIdx = next.index;
-          const content = recommendation.substring(startIdx, endIdx).trim();
-
-          // Split content into steps
-          const steps = content
-            .split(/\n\s*[•\-*]\s*|\n(?=\S)/)
-            .map(s => s.trim())
-            .filter(s => s && s.length > 0);
-
-          days.push({
-            title: `Day ${current.dayNum}`,
-            steps: steps
-          });
-        }
-
-        break; // Stop after finding matches with one pattern
-      }
-    }
-
-    // If no day patterns found, try to split by "Day X" mentions in text
-    if (!foundDays) {
-      const simpleDayPattern = /\b(Day\s+\d+)\b/g;
-      const dayMatches = [...recommendation.matchAll(simpleDayPattern)];
-
-      if (dayMatches.length > 0) {
-        foundDays = true;
-
-        // Extract day positions
-        const dayPositions = dayMatches.map(match => ({
-          title: match[0],
-          index: match.index
-        }));
-
-        // Add end position
-        dayPositions.push({
-          title: 'END',
-          index: recommendation.length
-        });
-
-        // Extract content between day markers
-        for (let i = 0; i < dayPositions.length - 1; i++) {
-          const current = dayPositions[i];
-          const next = dayPositions[i + 1];
-
-          const content = recommendation.substring(current.index, next.index).trim();
-
-          // Split content into steps
-          const steps = content
-            .split(/\n/)
-            .map(s => s.trim())
-            .filter(s => s && s.length > 0);
-
-          days.push({
-            title: current.title,
-            steps: steps
-          });
-        }
-      }
-    }
-
-    // If still no days found, treat the whole text as one section
-    if (!foundDays && recommendation.trim() !== '') {
-      const steps = recommendation
-        .split(/\n/)
-        .map(s => s.trim())
-        .filter(s => s && s.length > 0);
-
-      days.push({
-        title: 'Trip Details',
-        steps: steps
+    // Add budget badge if available
+    if (parsedData.detailedBudget?.['Total']) {
+      this.badges.push({
+        icon: 'fa-dollar-sign',
+        label: `$${parsedData.detailedBudget['Total']}`,
+        color: '#4CAF50'
       });
     }
 
-    console.log('Parsed days:', days);
-    return days;
-  }
+    // Add duration badge
+    if (parsedData.itineraryDays?.length) {
+      this.badges.push({
+        icon: 'fa-calendar-alt',
+        label: `${parsedData.itineraryDays.length} days`,
+        color: '#2196F3'
+      });
+    }
 
-  capitalize(str: string) {
-    return str.charAt(0).toUpperCase() + str.slice(1);
-  }
+    // Add activity badges based on itinerary content
+    const activities = new Set<string>();
+    parsedData.itineraryDays?.forEach(day => {
+      day.steps?.forEach(step => {
+        const stepClass = this.getStepClass(step);
+        if (stepClass) {
+          activities.add(stepClass);
+        }
+      });
+    });
 
-  getDestinationImage(destination: string): string {
-    // Use Unsplash for demo
-    return `https://source.unsplash.com/800x300/?${encodeURIComponent(destination)},travel`;
+    // Map activity types to icons
+    const activityIcons: { [key: string]: string } = {
+      'hiking': 'fa-hiking',
+      'water-activity': 'fa-umbrella-beach',
+      'cultural': 'fa-landmark',
+      'adventure': 'fa-mountain',
+      'dining': 'fa-utensils'
+    };
+
+    activities.forEach(activity => {
+      if (activityIcons[activity]) {
+        this.badges.push({
+          icon: activityIcons[activity],
+          label: activity.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' '),
+          color: '#FF9800'
+        });
+      }
+    });
   }
 
   getStepClass(step: string): string {
-    const lowerStep = step.toLowerCase();
-
-    if (lowerStep.includes('morning')) return 'morning-activity';
-    if (lowerStep.includes('afternoon')) return 'afternoon-activity';
-    if (lowerStep.includes('evening')) return 'evening-activity';
-
-    if (lowerStep.includes('taxi') || lowerStep.includes('shuttle') ||
-        lowerStep.includes('bus') || lowerStep.includes('car'))
-      return 'transportation';
-
-    if (lowerStep.includes('accommodation') || lowerStep.includes('hotel') ||
-        lowerStep.includes('resort') || lowerStep.includes('night'))
+    const step_lower = step.toLowerCase();
+    if (step_lower.includes('morning') || step_lower.includes('breakfast')) {
+      return 'morning-activity';
+    } else if (step_lower.includes('afternoon') || step_lower.includes('lunch')) {
+      return 'afternoon-activity';
+    } else if (step_lower.includes('evening') || step_lower.includes('dinner')) {
+      return 'evening-activity';
+    } else if (step_lower.includes('hotel') || step_lower.includes('stay') || step_lower.includes('accommodation')) {
       return 'accommodation';
-
-    if (lowerStep.includes('restaurant') || lowerStep.includes('dinner') ||
-        lowerStep.includes('lunch') || lowerStep.includes('breakfast') ||
-        lowerStep.includes('cuisine'))
+    } else if (step_lower.includes('drive') || step_lower.includes('taxi') || step_lower.includes('bus') || step_lower.includes('train')) {
+      return 'transportation';
+    } else if (step_lower.includes('restaurant') || step_lower.includes('eat') || step_lower.includes('food')) {
       return 'dining';
-
-    if (lowerStep.includes('hike') || lowerStep.includes('hiking') ||
-        lowerStep.includes('trail') || lowerStep.includes('mountain') ||
-        lowerStep.includes('forest'))
+    } else if (step_lower.includes('hike') || step_lower.includes('trek') || step_lower.includes('walk')) {
       return 'hiking';
-
-    if (lowerStep.includes('beach') || lowerStep.includes('swim') ||
-        lowerStep.includes('snorkel') || lowerStep.includes('ocean') ||
-        lowerStep.includes('sea'))
+    } else if (step_lower.includes('swim') || step_lower.includes('beach') || step_lower.includes('boat')) {
       return 'water-activity';
-
-    if (lowerStep.includes('zip-lining') || lowerStep.includes('adventure') ||
-        lowerStep.includes('canopy'))
+    } else if (step_lower.includes('adventure') || step_lower.includes('explore')) {
       return 'adventure';
-
-    if (lowerStep.includes('museum') || lowerStep.includes('cultural') ||
-        lowerStep.includes('heritage'))
+    } else if (step_lower.includes('museum') || step_lower.includes('temple') || step_lower.includes('history')) {
       return 'cultural';
-
+    }
     return '';
   }
 
-  openTripDetailsDialog(): void {
-    const dialogRef = this.dialog.open(TripDetailsDialogComponent, {
+  openTripDetailsDialog(parsedData: ParsedTripPlan) {
+    this.dialog.open(TripDetailsDialogComponent, {
       width: '100vw',
       height: '100vh',
       maxWidth: '100vw',
       maxHeight: '100vh',
       panelClass: 'full-screen-dialog',
-      data: {
-        destinationName: this.destinationName,
-        destinationImage: this.destinationImage,
-        badges: this.badges,
-        itineraryDays: this.itineraryDays
-      }
+      data: parsedData
     });
+  }
 
-    dialogRef.afterClosed().subscribe(result => {
-      console.log('The dialog was closed');
-    });
+  openChatbot() {
+    this.chatbotService.openChatbot();
   }
 }

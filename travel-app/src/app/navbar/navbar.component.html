@@ -19,11 +19,15 @@
     <a routerLink="/tours" routerLinkActive="active">
       <i class="fas fa-suitcase"></i> Tours
     </a>
+    <!-- Admin Dashboard Link -->
+    <a *ngIf="isAdmin" routerLink="/admin" routerLinkActive="active">
+      <i class="fas fa-user-shield"></i> Admin
+    </a>
   </div>
 
   <div class="auth-buttons">
     <!-- Profile icon shown only when logged in -->
-    <div class="profile-icon" *ngIf="isLoggedIn" [routerLink]="['/users', userId]" style="cursor: pointer;">
+    <div class="profile-icon" *ngIf="isLoggedIn" (click)="goToUserProfile()" style="cursor: pointer;">
       <img *ngIf="profilePhotoUrl" [src]="profilePhotoUrl" alt="User Profile" class="profile-photo"
            (error)="profilePhotoUrl = 'assets/images/default-avatar.svg'">
       <i *ngIf="!profilePhotoUrl" class="fas fa-user"></i>

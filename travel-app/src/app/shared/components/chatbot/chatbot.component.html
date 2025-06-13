@@ -1,0 +1,69 @@
+<div class="chatbot-container">
+  <!-- Existing main container background icons -->
+  <mat-icon class="background-icon-plane">flight</mat-icon>
+  <mat-icon class="background-icon-map-marker">location_on</mat-icon>
+  <mat-icon class="background-icon-compass">explore</mat-icon>
+
+  <div class="chatbot-header">
+    <div class="header-title">
+      <mat-icon>public</mat-icon>
+      <h2>Travel Assistant</h2>
+    </div>
+    <button mat-icon-button (click)="closeDialog()">
+      <mat-icon>close</mat-icon>
+    </button>
+  </div>
+
+  <div class="chat-messages" #messageContainer>
+    <!-- Chat-specific background elements -->
+    <mat-icon class="chat-bg-icon-1">hotel</mat-icon>
+    <mat-icon class="chat-bg-icon-2">camera_alt</mat-icon>
+    <mat-icon class="chat-bg-icon-3">nature</mat-icon>
+    <mat-icon class="chat-bg-icon-4">wb_sunny</mat-icon>
+    <mat-icon class="chat-bg-icon-5">luggage</mat-icon>
+
+    <!-- Floating dots for additional ambiance -->
+    <div class="chat-bg-dot-1"></div>
+    <div class="chat-bg-dot-2"></div>
+    <div class="chat-bg-dot-3"></div>
+
+    <!-- Your existing message loop -->
+    <div *ngFor="let message of messages"
+         [ngClass]="{'message-row': true, 'user': message.isUser, 'bot': !message.isUser}">
+      <div class="message-avatar">
+        <mat-icon>{{ message.isUser ? 'person' : 'auto_awesome' }}</mat-icon>
+      </div>
+      <div [ngClass]="{'message': true, 'user-message': message.isUser, 'bot-message': !message.isUser}">
+        <div class="message-content">
+          {{ message.content }}
+        </div>
+        <div class="message-timestamp">
+          {{ message.timestamp | date:'shortTime' }}
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="isLoading" class="message-row bot">
+      <div class="message-avatar">
+        <mat-icon>public</mat-icon>
+      </div>
+      <div class="message bot-message">
+        <div class="message-content">
+          <mat-spinner diameter="20"></mat-spinner>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="chat-input">
+    <mat-form-field appearance="outline" class="message-input">
+      <input matInput
+             [(ngModel)]="newMessage"
+             placeholder="Type your message..."
+             (keyup.enter)="sendMessage()">
+    </mat-form-field>
+    <button mat-fab color="primary" (click)="sendMessage()" [disabled]="!newMessage.trim()">
+      <mat-icon>send</mat-icon>
+    </button>
+  </div>
+</div>

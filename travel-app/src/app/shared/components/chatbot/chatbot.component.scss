@@ -1,0 +1,442 @@
+@use 'sass:color';
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&family=Playfair+Display:wght@700;800&display=swap');
+
+/* Overall Chatbot Container: A sleek, modern card mimicking travel apps */
+.chatbot-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* Occupy the full height set by the dialog */
+  width: 100%;  /* Occupy the full width set by the dialog */
+  position: relative; /* Needed for absolute positioning of pseudo-elements */
+  background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%); /* Login page gradient */
+  border-radius: 12px; /* Soft, inviting rounded corners */
+  box-shadow: 0 5px 20px rgba(0, 0, 0, 0.1); /* Subtle shadow from the image */
+  font-family: 'Montserrat', sans-serif;
+  overflow: hidden; /* Revert to hidden */
+  z-index: 1; /* Ensure chatbot content is above background elements */
+
+  /* Remove previous background element styles */
+  &::before {
+    content: none;
+  }
+  &::after {
+    content: none;
+  }
+  .background-shape-1, .background-shape-2, .background-shape-3 {
+    display: none; /* Hide old abstract shapes */
+  }
+
+  /* Enhanced background icons for main container */
+  .background-icon-plane {
+    position: absolute;
+    font-size: 3rem;
+    color: rgba(63, 197, 181, 0.08);
+    top: 10%;
+    left: 8%;
+    z-index: 0;
+    transform: rotate(-15deg);
+    animation: floating 8s ease-in-out infinite;
+  }
+
+  .background-icon-map-marker {
+    position: absolute;
+    font-size: 2.5rem;
+    color: rgba(63, 197, 181, 0.08);
+    bottom: 15%;
+    right: 10%;
+    z-index: 0;
+    animation: floating 6s ease-in-out infinite 2s;
+  }
+
+  .background-icon-compass {
+    position: absolute;
+    font-size: 2.8rem;
+    color: rgba(63, 197, 181, 0.08);
+    top: 25%;
+    right: 15%;
+    z-index: 0;
+    animation: floating 7s ease-in-out infinite 1s;
+  }
+}
+
+/* Chatbot Header: Evokes a travel agency's strong branding */
+.chatbot-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 18px 24px; /* Generous padding for a premium feel */
+  background: #ff6b6b; /* Red accent color from login page */
+  color: white;
+  border-radius: 12px 12px 0 0;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1); /* Softer shadow */
+
+  .header-title {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between icon and text */
+    mat-icon {
+      font-size: 28px;
+      width: 28px;
+      height: 28px;
+      color: white; /* White globe icon */
+    }
+  }
+
+  h2 {
+    margin: 0;
+    font-size: 1.5rem; /* Prominent title for clear identity */
+    font-weight: 700;
+    font-family: 'Montserrat', sans-serif; /* Consistent font with body */
+  }
+
+  button {
+    color: white; /* Close button stands out on dark header */
+    transition: transform 0.2s ease-in-out;
+    &:hover {
+      transform: scale(1.1); /* Interactive hover for closing */
+    }
+  }
+}
+
+/* Chat Messages Area: Enhanced with background elements */
+.chat-messages {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px 24px; /* Ample space for comfortable reading */
+  display: flex;
+  flex-direction: column;
+  gap: 15px; /* Clear separation between messages */
+  background-color: rgba(245, 247, 250, 0.95); /* Slightly transparent for background visibility */
+  position: relative; /* Enable absolute positioning for background elements */
+
+  /* Chat-specific background elements */
+  &::before {
+    content: '';
+    position: absolute;
+    top: 15%;
+    left: 5%;
+    width: 40px;
+    height: 40px;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="rgba(63,197,181,0.06)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/></svg>') no-repeat center;
+    background-size: contain;
+    animation: floating 6s ease-in-out infinite;
+    z-index: 0;
+  }
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 20%;
+    right: 8%;
+    width: 35px;
+    height: 35px;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="rgba(255,193,7,0.06)"><path d="M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.79 1.42-1.41zM4 10.5H1v2h3v-2zm9-9.95h-2V3.5h2V.55zm7.45 3.91l-1.41-1.41-1.79 1.79 1.41 1.41 1.79-1.79zm-3.21 13.7l1.79 1.8 1.41-1.41-1.8-1.79-1.4 1.4zM20 10.5v2h3v-2h-3zm-8-5c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6z"/></svg>') no-repeat center;
+    background-size: contain;
+    animation: floating 8s ease-in-out infinite 2s;
+    z-index: 0;
+  }
+
+  /* Additional background icons specific to chat area */
+  .chat-bg-icon-1 {
+    position: absolute;
+    font-size: 2rem;
+    color: rgba(63, 197, 181, 0.05);
+    top: 25%;
+    left: 15%;
+    z-index: 0;
+    transform: rotate(15deg);
+    animation: floating 7s ease-in-out infinite 1s;
+  }
+
+  .chat-bg-icon-2 {
+    position: absolute;
+    font-size: 1.8rem;
+    color: rgba(255, 107, 107, 0.05);
+    top: 45%;
+    right: 12%;
+    z-index: 0;
+    transform: rotate(-10deg);
+    animation: floating 9s ease-in-out infinite 3s;
+  }
+
+  .chat-bg-icon-3 {
+    position: absolute;
+    font-size: 2.2rem;
+    color: rgba(40, 167, 69, 0.05);
+    bottom: 35%;
+    left: 8%;
+    z-index: 0;
+    transform: rotate(20deg);
+    animation: floating 6s ease-in-out infinite 4s;
+  }
+
+  .chat-bg-icon-4 {
+    position: absolute;
+    font-size: 1.9rem;
+    color: rgba(255, 193, 7, 0.05);
+    top: 60%;
+    right: 20%;
+    z-index: 0;
+    transform: rotate(-15deg);
+    animation: floating 8s ease-in-out infinite 2.5s;
+  }
+
+  .chat-bg-icon-5 {
+    position: absolute;
+    font-size: 2.1rem;
+    color: rgba(63, 197, 181, 0.04);
+    bottom: 15%;
+    right: 25%;
+    z-index: 0;
+    animation: floating 5s ease-in-out infinite 1.5s;
+  }
+
+  /* Floating dots for additional ambiance */
+  .chat-bg-dot-1 {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: rgba(63, 197, 181, 0.1);
+    border-radius: 50%;
+    top: 20%;
+    right: 30%;
+    animation: floating 4s ease-in-out infinite;
+    z-index: 0;
+  }
+
+  .chat-bg-dot-2 {
+    position: absolute;
+    width: 6px;
+    height: 6px;
+    background: rgba(255, 107, 107, 0.08);
+    border-radius: 50%;
+    bottom: 40%;
+    left: 25%;
+    animation: floating 5s ease-in-out infinite 2s;
+    z-index: 0;
+  }
+
+  .chat-bg-dot-3 {
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    background: rgba(255, 193, 7, 0.08);
+    border-radius: 50%;
+    top: 70%;
+    left: 30%;
+    animation: floating 6s ease-in-out infinite 3s;
+    z-index: 0;
+  }
+
+  /* Scrollbar styling - like smooth travel on a highway */
+  &::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: #e0e2e7; /* Lighter track */
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb {
+    background: #c3cfe2; /* Darker thumb from login gradient */
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background: #a9b5c9; /* Even darker on hover */
+  }
+}
+
+/* Individual Message Bubbles: Smooth, cloud-like conversation bubbles */
+.message {
+  max-width: calc(100% - 70px); /* Adjusted for avatar width (40px) + gap (10px) + extra margin */
+  padding: 12px 18px; /* Comfortable text padding */
+  border-radius: 15px; /* Softer rounded corners for general message */
+  margin: 0; /* Remove default margin */
+  line-height: 1.5;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05); /* Softer depth for bubbles */
+  position: relative;
+  animation: fadeIn 0.3s ease-out; /* Smooth entry for new messages */
+  z-index: 2; /* Ensure messages appear above background elements */
+
+  .message-content {
+    word-wrap: break-word;
+    font-size: 1rem;
+  }
+
+  .message-timestamp {
+    font-size: 0.75rem;
+    opacity: 0.7; /* Slightly less opaque */
+    margin-top: 8px; /* Separates time from message content */
+    text-align: right; /* Keeps timestamps tidy */
+    color: #636e72; /* Color from login page text */
+  }
+}
+
+/* User Messages: Reflecting the user's active journey */
+.user-message {
+  align-self: flex-end;
+  background-color: #ff6b6b; /* Exact blue from the image */
+  color: white;
+  border-radius: 15px 15px 5px 15px; /* Rounded top-left, top-right, bottom-left, sharper bottom-right (tail) */
+
+  .message-timestamp {
+    color: white;
+    opacity: 0.8; /* Adjusted opacity to match the faded look in the image */
+  }
+}
+
+/* Bot Messages: Friendly, informative, like a clear itinerary */
+.bot-message {
+  align-self: flex-start;
+  background-color: white; /* White background from login card */
+  color: #333;
+  border-radius: 15px 15px 15px 5px; /* Rounded top-left, top-right, bottom-right, sharper bottom-left (tail) */
+}
+
+/* Chat Input Area: The portal for new adventures (queries) */
+.chat-input {
+  display: flex;
+  align-items: center;
+  padding: 16px 24px; /* Consistent padding with header */
+  gap: 10px; /* Clean spacing */
+  border-top: 1px solid #e0e0e0; /* Light border from login inputs */
+  background-color: white; /* Clean white background */
+  box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.03); /* Lighter shadow */
+
+  .message-input {
+    flex: 1;
+    mat-form-field {
+      width: 100%;
+      .mat-form-field-wrapper {
+        padding-bottom: 0;
+      }
+      .mat-form-field-flex {
+        background-color: white; /* White input field background */
+        border-radius: 10px; /* From login input */
+        padding: 8px 16px; /* Text input comfort */
+        border: 2px solid #e0e0e0; /* From login input */
+        box-shadow: none; /* No inner shadow */
+      }
+      .mat-form-field-outline {
+        display: none; /* Rely on custom box-shadow for focus */
+      }
+      input {
+        font-size: 1rem;
+        color: #333;
+        &::placeholder {
+          color: #b2bec3; /* From login placeholder */
+        }
+        &:focus {
+          border-color: #ff6b6b; /* Login focus color */
+          box-shadow: 0 0 0 3px rgba(255, 107, 107, 0.1); /* Login focus shadow */
+          outline: none;
+        }
+      }
+    }
+  }
+
+  /* Send Button: A powerful call to action, like a booking button */
+  button {
+    background: #ff6b6b; /* Red accent from login page */
+    color: white;
+    box-shadow: 0 4px 12px rgba(255, 107, 107, 0.3); /* Lifted, ready to send */
+    transition: all 0.3s ease; /* More consistent transition */
+
+    &:hover {
+      background: color.adjust(#ff6b6b, $lightness: -5%); /* Darker on hover */
+      transform: translateY(-2px); /* Slight lift on hover */
+      box-shadow: 0 6px 15px rgba(255, 107, 107, 0.4); /* Enhanced shadow on hover */
+    }
+
+    &:disabled {
+      background: #b2bec3; /* Muted when disabled */
+      box-shadow: none;
+      cursor: not-allowed;
+      transform: none;
+    }
+  }
+}
+
+/* Loading Spinner: Indicates thinking, like the AI planning a trip */
+.bot-message mat-spinner {
+  margin: 0 auto; /* Center the spinner */
+}
+
+/* Enhanced floating animation with more variation */
+@keyframes floating {
+  0% {
+    transform: translateY(0) rotate(0deg);
+  }
+  33% {
+    transform: translateY(-8px) rotate(2deg);
+  }
+  66% {
+    transform: translateY(-5px) rotate(-1deg);
+  }
+  100% {
+    transform: translateY(0) rotate(0deg);
+  }
+}
+
+/* Fade in animation: Smooth transition for new messages */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Message Row: Container for avatar and message bubble */
+.message-row {
+  display: flex;
+  align-items: flex-start; /* Align avatar and message to the top */
+  gap: 10px; /* Space between avatar and message */
+  margin-bottom: 15px; /* Space between message rows */
+  position: relative; /* Ensure proper z-index stacking */
+  z-index: 2; /* Above background elements */
+
+  &.user {
+    justify-content: flex-end; /* Align user messages to the right */
+  }
+
+  &.bot {
+    justify-content: flex-start; /* Align bot messages to the left */
+  }
+}
+
+/* Avatar styling */
+.message-avatar {
+  width: 40px; /* Avatar size */
+  height: 40px;
+  border-radius: 50%; /* Circular shape */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0; /* Prevent avatar from shrinking */
+  z-index: 3; /* Above everything */
+  mat-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    color: white;
+  }
+}
+
+/* Specific avatar colors based on message type */
+.message-row.user .message-avatar {
+  background-color: #ff6b6b; /* Same as user message bubble */
+}
+
+.message-row.bot .message-avatar {
+  background-color: white; /* White background for bot avatar */
+  border: 1px solid #e0e2e7; /* Light border from login page */
+  mat-icon {
+    color: #b2bec3; /* Grey icon like login placeholder */
+  }
+}

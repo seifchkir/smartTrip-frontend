@@ -1,0 +1,129 @@
+.dashboard-container {
+  h1 {
+    margin-bottom: 24px;
+    color: #333;
+    font-weight: 500;
+  }
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.stat-card {
+  .mat-card-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px;
+  }
+
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    background-color: rgba(25, 118, 210, 0.1);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    mat-icon {
+      color: #1976d2;
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+  }
+
+  .stat-info {
+    h3 {
+      margin: 0;
+      font-size: 14px;
+      color: #666;
+      font-weight: 500;
+    }
+
+    .stat-value {
+      margin: 4px 0 0;
+      font-size: 24px;
+      font-weight: 500;
+      color: #333;
+    }
+  }
+}
+
+.charts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.chart-card {
+  .mat-card-header {
+    margin-bottom: 16px;
+  }
+
+  .mat-card-content {
+    height: 300px;
+  }
+}
+
+.recent-bookings {
+  .mat-card-header {
+    margin-bottom: 16px;
+  }
+
+  table {
+    width: 100%;
+  }
+
+  .mat-header-cell {
+    font-weight: 500;
+    color: #666;
+  }
+
+  .mat-cell {
+    color: #333;
+  }
+
+  .status-badge {
+    padding: 4px 8px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 500;
+
+    &.confirmed {
+      background-color: rgba(76, 175, 80, 0.1);
+      color: #4caf50;
+    }
+
+    &.pending {
+      background-color: rgba(255, 152, 0, 0.1);
+      color: #ff9800;
+    }
+
+    &.completed {
+      background-color: rgba(33, 150, 243, 0.1);
+      color: #2196f3;
+    }
+  }
+}
+
+// Responsive styles
+@media (max-width: 768px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .charts-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .chart-card .mat-card-content {
+    height: 250px;
+  }
+}

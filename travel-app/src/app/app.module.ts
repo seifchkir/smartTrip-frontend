@@ -1,37 +1,38 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { FormsModule } from '@angular/forms';
 import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { HttpClientModule } from '@angular/common/http';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 
-// Angular Material Imports
-import { MatDialogModule } from '@angular/material/dialog';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatTabsModule } from '@angular/material/tabs';
-import { MatCardModule } from '@angular/material/card';
-
-import { HomeComponent } from './home/home.component';
-import { NavbarComponent } from './navbar/navbar.component';
+import { AppRoutingModule } from './app-routing.module';
+import { AppComponent } from './app.component';
+import { AuthGuard } from './guards/auth.guard';
+import { AdminGuard } from './guards/admin.guard';
+import { HomeModule } from './home/home.module';
+import { AdminModule } from './admin/admin.module';
+import { SharedModule } from './shared/shared.module';
+import { ChatbotModule } from './shared/components/chatbot/chatbot.module';
 
 @NgModule({
   declarations: [
-
+    AppComponent
   ],
   imports: [
     BrowserModule,
-    FormsModule,
+    BrowserAnimationsModule,
     HttpClientModule,
-    BrowserAnimationsModule, // Make sure this is included
-    MatDialogModule,
-    MatButtonModule,
-    MatIconModule,
-    MatTabsModule,
-    MatCardModule
+    FormsModule,
+    ReactiveFormsModule,
+    AppRoutingModule,
+    HomeModule,
+    AdminModule,
+    SharedModule,
+    ChatbotModule
   ],
-  providers: [],
-  exports: [
-
-  ]
+  providers: [
+    AuthGuard,
+    AdminGuard
+  ],
+  bootstrap: [AppComponent]
 })
 export class AppModule { }
